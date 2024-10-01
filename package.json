@@ -1,0 +1,26 @@
+{
+  "name": "nodebit",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test:unit": "vitest"
+  },
+  "dependencies": {
+    "vue": "^3.4.29",
+    "vue-draggable-resizable": "^3.0.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^5.0.5",
+    "@vue/test-utils": "^2.4.6",
+    "jsdom": "^24.1.0",
+    "sass": "^1.79.4",
+    "start-server-and-test": "^2.0.4",
+    "vite": "^5.3.1",
+    "vite-plugin-vue-devtools": "^7.3.1",
+    "vitest": "^1.6.0"
+  }
+}

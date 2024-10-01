@@ -1,0 +1,109 @@
+@import "vue-draggable-resizable/style.css";
+
+.node {
+    border: solid 1px var(--color-command);
+    cursor: pointer;
+    position: absolute;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--color-background);
+  
+    &.active {
+      outline: solid 1px rgba(255, 255, 255, 0.371);
+      z-index: 2 !important;
+    }
+  
+    &.node-out {
+      border-radius: 0 0 20px 20px;
+  
+      textarea {
+        color: var(--color-t);
+      }
+    }
+  
+    &.node-number {
+  
+      textarea {
+        color: yellow;
+      }
+    }
+
+    &.node-conmut {
+        border-radius: 0 20px 0 20px;
+        textarea {
+          color: var(--color-t);
+        }
+    }
+  
+    &.node-switch {
+    border-radius: 0 0 0 20px;
+      padding-top: 0.5rem;
+
+      textarea {
+        color: var(--color-t);
+        text-transform: uppercase;
+      }
+    }
+  
+    .handle {
+      background: transparent;
+      border: none;
+    }
+  
+    textarea {
+      width: 100%;
+      resize: none;
+      background: transparent;
+      color: white;
+      border: 1px none white;
+      padding: 13px 0.5em;
+      field-sizing: content;
+      cursor: pointer;
+      text-align: center;
+      min-height: 40px;
+      
+      // &::selection {
+      //     background-color: red;
+      // }
+  
+      &:focus {
+        cursor: text;
+        outline: none;
+      }
+    }
+  
+    .inputs,
+    .outputs {
+      position: absolute;
+      gap: 10px;
+      width: 100%;
+      display: flex;
+    }
+  
+    .inputs {
+      top: 0;
+    }
+    .outputs {
+      justify-content: flex-end;
+      bottom: 0;
+  
+      .socket {
+        cursor: grabbing;
+      }
+    }
+  
+    .socket {
+      width: 10px;
+      height: 3px;
+      outline: solid 1px var(--color-command);
+      font-size: 9pt;
+      text-align: center;
+      color: grey;
+      
+  
+      &.active {
+        background: var(--color-command);
+      }
+    }
+  }

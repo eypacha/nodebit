@@ -1,0 +1,11 @@
+@import './base.css';
+
+#app {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  font-weight: normal;
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
