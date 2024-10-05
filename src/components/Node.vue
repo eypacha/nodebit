@@ -17,22 +17,23 @@
       tabindex="1"
       @dblclick="editable = nodeTypes[node.type].editable"
       @focus="$parent.selectNode(node.id)"
-      @blur="handleBlur"
-      @keyup="handleNodeKeyUp"
+      @keyup.stop="handleNodeKeyUp"
       @keydown="handleKeyDown"
       @dragstart="editable = false"
       @dragging="handleDrag"
-      @click.exact.stop="$parent.handleNodeClick(node.id)"
-      @click.shift.exact.stop="$parent.selectNode(node.id)"
+      @mousedown.stop
+      @mouseup.stop
+      @click.exact.stop="$parent.handleNodeClick(node.id,$event)"
+      @click.shift.exact.stop="$parent.toggleSelection(node.id)"
       @resizing="handleResizing"
     >
       <textarea
         v-if="nodeTypes[node.type].editable"
         autofocus
         ref="textarea"
-        :class="{ noselect: isDrawingPath || !selected }"
+        :class="{ noselect: !editable }"
         :readOnly="!editable"
-        @blur="editable = false"
+        @blur="handleBlur"
         role="textbox"
         v-model="node.content"
         @input="updateSize"
@@ -184,9 +185,9 @@
     },
     methods: {
       handleBlur(){
-  
-        // this.$parent.selectedNode = null;
-
+        this.editable = false
+        if(this.node.type !== 'empty' || this.node.content.trim() != '') return
+        this.$parent.deleteNode(this.node.id)
       },
       handleDrag(left, top) {
         this.$emit('update:node', { ...this.node, x: left, y: top }, false);
@@ -200,14 +201,16 @@
      },
       handleNodeKeyUp(event) {
 
+        if(event.key == "Delete" || event.key == "Backspace") {
+            if(this.editable) return
+            this.$parent.deleteNode(this.node.id)
+        }
+        
         if(event.key == "Escape") {
           if(this.editable) {
             this.editable = false;
             this.$emit('update:node',this.node)
-          } else {
-            this.handleBlur()
-          }
-         
+          } 
         }
         
       },
@@ -241,10 +244,11 @@
 
         let type = getNodeType(content);
         const minWidth = this.nodeTypes[type]?.minWidth || 60;
-        const minHeight = this.nodeTypes[type]?.minHeight || 60;
+        const minHeight = this.nodeTypes[type]?.minHeight || 41;
 
         if (type === 'switch') {
           w = minWidth;
+          h = 41
         } else if (type === 'exp') {
           w = Math.max(w, minWidth);
           content = content === 'exp' ? '' : content;
@@ -261,6 +265,9 @@
         if(!this.nodeTypes[type].editable) this.editable = false
 
         this.$emit('update:node', { ...this.node, content, type, w, h });
+
+        if(!this.editable) return
+
         this.$nextTick(() => this.updateSize());
       },
       switchChange(socket) {

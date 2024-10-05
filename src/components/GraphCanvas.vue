@@ -3,8 +3,11 @@
     ref="canvas" 
     class="canvas" 
     :class="`mode-${mode}`" 
-    @click.ctrl="addNode" 
-    @click="deselectAll"
+    @click.ctrl.prevent="addNode" 
+    @click="handleCanvasClick"
+    @mousedown="startMouseSelection"
+    @mousemove="trackMousePosition"
+    @mouseleave="this.selectionBox = false"
   >
     <ConnectionsLayer
       :connections="connections"
@@ -29,6 +32,12 @@
       @switch-change="switchChange"
     />
 
+    <div
+      v-if="selectionBox?.width > 4 || selectionBox?.height > 4"
+      class="selection-box"
+      :style="{ left: `${selectionBox.left}px`, top: `${selectionBox.top}px`, width: `${selectionBox.width}px`, height: `${selectionBox.height}px`}"
+      >
+    </div>
     
   </div>
 </template>
@@ -57,7 +66,9 @@ export default {
       isPlaying: false,
       selectedNode: null,
       selectedNodes: [],
+      preSelectedNodes: [],
       selectedConnections: [],
+      selectionBox: null,
       mode: 'default',
       pathData: {},
       connecting: {},
@@ -65,6 +76,8 @@ export default {
       connections: presets[0].connections,
       expressions: ['',''],
       error: null,
+      waveState: 0,
+      intervalId: null
     };
   },
   computed: {
@@ -75,6 +88,19 @@ export default {
   methods: {
     find(property, key, value) {
       return this[property].find(item => item[key] === value);
+    },
+    generateWave() {
+      var wave = ['\u00B8', '.', '\u00B7', '\u00B4', '\u00AF', '`', '\u00B7', '.', '\u00B8'];
+      var hash = '';
+      
+      for (var i = 0; i < 800; ++i) {
+        hash += wave[(i + this.waveState) % wave.length]; // Accedemos a this.state.index
+      }
+
+      this.setHash(hash.split("").reverse().join(""), 'wave');
+      
+      // Actualiza el índice directamente desde el estado
+      this.waveState = (this.waveState === wave.length - 1) ? 0 : this.waveState + 1;
     },
     exportByte() {
       const stringData = this.generateStringData();
@@ -88,6 +114,25 @@ export default {
       };
       return JSON.stringify(data, null, 0);
       
+    },
+    setHash(str, title) {
+      str = str.replace(/ /g, '\u2800');
+      window.location.replace('#' + str);
+    },
+    StartAnimation() {
+      if (this.intervalId) return; // Evita múltiples intervalos si ya está corriendo
+      
+      // Ejecuta generateWave cada 50ms
+      this.intervalId = setInterval(() => {
+        this.generateWave(); // Llama directamente sin necesidad de parámetros
+      }, 50);
+    },
+    StopAnimation() {
+      if (this.intervalId) {
+        clearInterval(this.intervalId); // Detiene el intervalo
+        this.intervalId = null; 
+        this.setHash('')        // Limpia el ID del intervalo
+      }
     },
     async evaluateBytebeat() {
       try {
@@ -175,6 +220,7 @@ export default {
       if (this.isPlaying) {
         this.byteBeatNode.disconnect();
         this.isPlaying = false;
+        this.StopAnimation()
         return
       }
 
@@ -198,6 +244,7 @@ export default {
         
         this.byteBeatNode.setExpressions([...this.expressions]);
         this.isPlaying = true;
+        this.StartAnimation()
 
         console.log('playing',this.isPlaying)
 
@@ -214,6 +261,7 @@ export default {
     stop() {
       this.byteBeatNode.disconnect();
       this.isPlaying = false;
+      this.StopAnimation()
     },
     switchChange(node, socket) {
       let firstMatchFound = false;
@@ -261,24 +309,113 @@ export default {
     deselectAll() {
       this.selectedNodes = []
       this.selectedConnections = []
+      this.seletionBox = null
     },
-    handleNodeClick(id) {
+    handleNodeClick(nodeClick) {
       this.deselectAll()
-      this.selectNode(id)
+      this.selectNode(nodeClick)
     },
     selectNode(nodeId) {
       if (!this.selectedNodes.includes(nodeId)) {
         this.selectedNodes.push(nodeId)
       }
     },
+    toggleSelection(nodeId){
+      if (this.selectedNodes.includes(nodeId)) {
+        this.selectedNodes = this.selectedNodes.filter(id => id !== nodeId);
+      } else {
+        this.selectedNodes.push(nodeId);
+      }
+    },
     selectConnection(connId) {
-      console.log('selectConnection',connId)
       if (!this.selectedConnections.includes(connId)) {
         this.selectedConnections.push(connId)
       }
     },
+    handleCanvasClick(){
+      if(this.selectionBox.width < 2) this.deselectAll()
+      this.selectionBox = false
+    },
+    startMouseSelection(event){
+
+      console.log('startMouseSelection')
+
+      this.preSelectedNodes = [...this.selectedNodes]
+
+      const { x, y } = getMousePosition(event,this.canvasRect);
+
+      this.selectionBox = {
+        startX: x,
+        startY: y,
+        left: x,
+        top: y,
+        width: 0,
+        height: 0
+      }
+    },
+    trackMousePosition(event){
+
+      if(event.buttons != 1) return
+      if(!this.selectionBox) return
+
+      const { x, y } = getMousePosition(event,this.canvasRect);
+      const { startX, startY } = this.selectionBox
+
+      this.selectionBox = {
+        startX: startX,
+        startY: startY,
+        left: Math.min(x, startX),
+        top: Math.min(y, startY),
+        width: Math.abs(x - startX),
+        height: Math.abs(y - startY),
+      };
+
+      this.mouseSelectNodes()
+
+    },
+    mouseSelectNodes() {
+  const newSelectedNodes = this.nodes
+    .filter(node => {
+      const nodeRight = node.x + node.w;
+      const nodeBottom = node.y + node.h;
+      const selectionRight = this.selectionBox.left + this.selectionBox.width;
+      const selectionBottom = this.selectionBox.top + this.selectionBox.height;
+      return (
+        node.x < selectionRight &&
+        nodeRight > this.selectionBox.left &&
+        node.y < selectionBottom &&
+        nodeBottom > this.selectionBox.top
+      );
+    })
+    .map(node => node.id);
+
+  // Invertir la selección
+  this.selectedNodes = this.nodes
+    .filter(node => {
+      const nodeId = node.id;
+
+      // Si el nodo está en `newSelectedNodes`, queremos invertir su estado:
+      // 1. Si está en `preSelectedNodes`, lo quitamos.
+      // 2. Si no está en `preSelectedNodes`, lo seleccionamos.
+      const isSelectedBefore = this.preSelectedNodes.includes(nodeId);
+      const isSelectedNow = newSelectedNodes.includes(nodeId);
+
+      // Mantenemos el nodo si estaba seleccionado antes pero no lo está ahora (deseleccionar),
+      // o si no estaba seleccionado antes y ahora lo está (seleccionar).
+      return (isSelectedBefore && !isSelectedNow) || (!isSelectedBefore && isSelectedNow);
+    })
+    .map(node => node.id);
+},
+    endMouseSelection(){
+
+
+      console.log('endMouseSelection',[...this.selectedNodes])
+      
+
+      this.selectionBox = null
+
+    },
     handleConnectionClick(connId) {
-      console.log('click connection',connId)
       this.deselectAll()
       this.selectConnection(connId)
     },
@@ -345,7 +482,6 @@ export default {
       
     },
     handleStartPath(event, node, socket) {
-      console.log('start path')
       this.mode = 'routing';
       this.connecting = { node, socket: socket };
       const { x, y } = getMousePosition(event,this.canvasRect);
@@ -477,6 +613,8 @@ ${subgroup ? subgroup[outputNode.content].description : this.nodeTypes[outputNod
 
       if(event.key == "Delete" || event.key == "Backspace") {
 
+        console.log('delete in canvas')
+
         this.deleteSelecteConnections()
         this.deleteSelectedNodes()
 
@@ -503,6 +641,8 @@ ${subgroup ? subgroup[outputNode.content].description : this.nodeTypes[outputNod
     }
 
     this.handleCancelPath();
+
+    this.StopAnimation()
   },
 };
 </script>

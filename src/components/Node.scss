@@ -16,11 +16,13 @@
   
     &.selected {
       outline: solid 1px rgba(255, 255, 255, 1);
+      background: color-mix(in srgb, var(--color-background), white 4%);
       z-index: 2 !important;
     }
 
     &.editable {
       outline: dashed 1px rgba(255, 255, 255, 1);
+      background: var(--color-background);
 
       textarea {
         cursor: text;
@@ -39,6 +41,8 @@
       overflow: hidden;
       width: inherit;
       height: inherit;
+      font-family: var(--main-font);
+      font-optical-sizing: auto;
   
       &:focus {
         outline: none;
