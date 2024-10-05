@@ -6,7 +6,7 @@ export function bezierPath(x1, y1, x2, y2, threshold = 5) {
 }
 
 export function generateUniqueId() {
-  return "id-" + Date.now() + "-" + Math.floor(Math.random() * 1000);
+  return parseInt(Date.now() + "" + Math.floor(Math.random() * 1000));
 }
 
 export function getMousePosition(event, canvasRect = {left: 0, top:0 }) {
@@ -15,23 +15,43 @@ export function getMousePosition(event, canvasRect = {left: 0, top:0 }) {
     return { x: clientX - left, y: clientY - top };
   }
 
-export function getNodeType(content) {
-  
-    if (content === "") {
-        return "empty";
+export function downloadFile(content, fileName, contentType) {
+  const blob = new Blob([content], { type: contentType });
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(blob);
+  link.download = fileName;
+  link.click();
+  URL.revokeObjectURL(link.href); // Limpiar el objeto URL después de usarlo
+}
+
+export function copyToClipboard(text) {
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(text)
+      .then(() => {
+        console.log('Texto copiado al portapapeles');
+      })
+      .catch(err => {
+        console.error('Error al copiar el texto: ', err);
+      });
+  } else {
+
+    const textArea = document.createElement("textarea");
+    textArea.value = text;
+    document.body.appendChild(textArea);
+    textArea.select();
+    try {
+      document.execCommand('copy');
+      console.log('Texto copiado al portapapeles');
+    } catch (err) {
+      console.error('Error al copiar el texto: ', err);
     }
-    
-    if (["out", "switch"].includes(content)) {
-        return content;
-    }
-    
-    if (!isNaN(parseFloat(content)) && isFinite(content)) {
-        return "number";
-    }
-    
-    if (["+","*","|","^","&"].includes(content)) {
-        return "conmut";
-    }
-    
-    return "exp";
+    document.body.removeChild(textArea);
+  }
+}
+
+export function trimParens(s) {
+  if (s.startsWith('(') && s.endsWith(')')) {
+      return s.slice(1, -1);
+  }
+  return s;
 }
