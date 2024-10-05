@@ -1,5 +1,5 @@
 <template>
-    <header>nodebit 0.1</header>
+    <header class="noselect">nodebit 0.0001</header>
     <graph-canvas/>
 </template>
 
