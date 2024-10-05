@@ -18,20 +18,22 @@
     }
 
   }
-
-  &.mode-deleting {
-    
-    .node,
-    .node textarea,
-    svg.connections path {
-      cursor: not-allowed;
-    }
-  }
 }
 
-.evaluated {
+.info-bar {
   position: absolute;
-  bottom: 10px;
-  left: 10px;
-  z-index: 3
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-endth;
+  gap: 0.5rem;
+  bottom: 0;
+  left: 0;
+  padding: 0.5em;
+  z-index: 3;
+
+  .error {
+    color: red;
+    height: min-content;
+  }
 }

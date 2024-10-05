@@ -1,21 +1,24 @@
 <template>
   <svg class="connections">
     <path
-      v-if="mode == 'routing'"
-      :d="bezierPath(pathData.x1, pathData.y1, pathData.x2, pathData.y2)"
-      fill="transparent"
-      stroke="yellow"
-      stroke-width="2"
-    />
-    <path
       v-for="connection in computedConnections"
       :key="connection.id"
       :d="connection.path"
       fill="transparent"
-      stroke="yellow"
+      :class="{'selected': $parent.selectedConnections.includes(connection.id) }"
       stroke-width="2"
-      @mousedown="$emit('path-click', connection.id)"
+      tabindex="2"
+      @focus="this.$parent.selectedConnection = connection.id"
+      @blur="this.$parent.selectedConnection = null"
+      @click.exact.stop="$parent.handleConnectionClick(connection.id)"
+      @click.shift.exact.stop="$parent.selectConnection(connection.id)"
       :stroke-dasharray="connection.active ? 'none' : '4'"
+    />
+    <path
+      v-if="mode == 'routing'"
+      :d="bezierPath(pathData.x1, pathData.y1, pathData.x2, pathData.y2)"
+      fill="transparent"
+      stroke-width="2"
     />
   </svg>
 </template>
@@ -81,10 +84,22 @@ export default {
   left: 0;
   width: 100%;
   height: 100%;
-  opacity: 0.7;
 
   path {
+    stroke: yellow;
+    opacity: 0.7;
     cursor: pointer;
+
+    &:focus {
+      outline: none;
+    }
+
+    &.selected {
+      opacity: 1;
+      stroke: white
+    }
+
   }
+
 }
 </style>
