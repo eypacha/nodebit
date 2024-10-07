@@ -125,15 +125,6 @@ export const presets = [
         lastSocketConnected: 0,
       },
       {
-        id: 1727974286986857,
-        type: "export",
-        content: "export",
-        w: 60,
-        h: 40,
-        x: 20,
-        y: 98,
-      },
-      {
         id: 1727977186152467,
         type: "exp",
         content:
@@ -185,8 +176,8 @@ export const presets = [
         content: "evaluated",
         w: 560,
         h: 62,
-        x: 578,
-        y: 554,
+        x: 580,
+        y: 617,
       },
       {
         id: 1728104384988501,
@@ -268,38 +259,10 @@ export const presets = [
       {
         id: 1728105887149907,
         type: "comment",
-        content: `// nodebit v0.0001
-
-Ctrl + Click          -> Create new empty node
-Alt + Click           -> Delete node or path
-Click                 -> Select a node
-Double click          -> Edit node 
-Shift + Enter         -> New line
-Enter                 -> Evaluate node
-Del / Backspace       -> Delete selected path or node
-T hover a path        -> Toggle ghost connection
-1,2,3,4....           -> Change paths in selected switch node
-
-NODE_TYPES
-Autodetect type when the node is evaluated
-
-t                     -> Time variable
-14, .5, 0xFF, 0b1010  -> Number
-+ - * / %             -> Operators
-! & | ^ >> <<         -> Logic and bytewise operatros
-+[] &[] |[]...        -> Array operators
-play                  -> Play/pause button
-export                -> Export byte to JSON (no import yet)
-out                   -> Main output to evaluate
-evaluated             -> Evaluated expressions
-switch                -> Selects between multiple inputs
-mouse                 -> Get mouse (X,Y) position
-help                  -> Displays help about a specific node
-manual                -> Displays this message
-sin, cos, tan, sqr    -> All JavaScript Math functions
-((t >> 10) & 42       -> Expression (default node)`,
+        content:
+          "// nodebit v0.0001\n\nCtrl + Click          -> Create new empty node\nAlt + Click           -> Delete node or path\nClick                 -> Select a node\nDouble click          -> Edit node \nShift + Enter         -> New line\nEnter                 -> Evaluate node\nDel / Backspace       -> Delete selected path or node\nT hover a path        -> Toggle ghost connection\n1,2,3,4....           -> Change paths in selected switch node\n\nNODE_TYPES\nAutodetect type when the node is evaluated\n\nt                     -> Time variable\n14, .5, 0xFF, 0b1010  -> Number\n+ - * / %             -> Operators\n! & | ^ >> <<         -> Logic and bytewise operatros\n+[] &[] |[]...        -> Array operators\nplay                  -> Play/pause button\nexport                -> Export byte to JSON\nimport                -> Import JSON file\nout                   -> Main output to evaluate\nevaluated             -> Evaluated expressions\nswitch                -> Selects between multiple inputs\nmouse                 -> Get mouse (X,Y) position\nhelp                  -> Displays help about a specific node\nmanual                -> Displays this message\nsin, cos, tan, sqr    -> All JavaScript Math functions\n((t >> 10) & 42       -> Expression (default node)",
         w: 518,
-        h: 522,
+        h: 584,
         x: 620,
         y: 21,
       },
