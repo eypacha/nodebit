@@ -5,13 +5,13 @@
       :key="connection.id"
       :d="connection.path"
       fill="transparent"
-      :class="{'selected': $parent.selectedConnections.includes(connection.id) }"
+      :class="{ selected: studio.selectedConnections.includes(connection.id) }"
       stroke-width="2"
       tabindex="2"
-      @focus="this.$parent.selectedConnection = connection.id"
-      @blur="this.$parent.selectedConnection = null"
-      @click.exact.stop="$parent.handleConnectionClick(connection.id)"
-      @click.shift.exact.stop="$parent.selectConnection(connection.id)"
+      @focus="studio.selectedConnection = connection.id"
+      @blur="studio.selectedConnection = null"
+      @click.exact.stop="handleConnectionClick(connection.id)"
+      @click.shift.exact.stop="studio.selectConnection(connection.id)"
       :stroke-dasharray="connection.active ? 'none' : '4'"
     />
     <path
@@ -23,58 +23,50 @@
   </svg>
 </template>
 
-<script>
+<script setup>
 import { bezierPath } from "@/utils/helpers";
 
-export default {
-  props: {
-    connections: {
-      type: Array,
-      required: true
-    },
-    nodes: {
-      type: Array,
-      required: true
-    },
-    mode: {
-      type: String,
-      default: 'default',
-    },
-    pathData: {
-      type: Object,
-      default: () => ({})
-    },
-  },
-  computed: {
-    computedConnections() {
-      return this.connections.map(connection => ({
-        ...connection,
-        path: this.pathNode2Node(connection.output, connection.input),
-      }));
-    }
-  },
-  methods: {
-    getNodeById(nodeId) {
-      return this.nodes.find((n) => n.id === nodeId);
-    },
-    pathNode2Node(output, input) {
-      const nodeA = this.getNodeById(output.id);
-      const nodeB = this.getNodeById(input.id);
+import { computed } from "vue";
+import { useStudioStore } from "@/stores/studio";
 
-      const { x: xA, y: yA, w: wA, h: hA } = nodeA;
-      const { x: xB, y: yB } = nodeB;
+const studio = useStudioStore();
 
-      const startX = xA + wA - 5 - output.socket * 20;
-      const startY = yA + hA;
+const props = defineProps({
+  mode: String,
+  pathData: Object,
+});
 
-      const endX = xB + 5 + input.socket * 20;
-      const endY = yB + 1;
+const computedConnections = computed(() => {
+  return studio.connections.map((connection) => ({
+    ...connection,
+    path: pathNode2Node(connection.output, connection.input),
+  }));
+});
 
-      return bezierPath(startX, startY, endX, endY);
-    },
-    bezierPath
-  }
-};
+
+function handleConnectionClick(connId) {
+  studio.deselectAll();
+  studio.selectConnection(connId);
+}
+function pathNode2Node(output, input) {
+
+  const nodeA = getNodeById(output.id);
+  const nodeB = getNodeById(input.id);
+
+  const { x: xA, y: yA, w: wA, h: hA } = nodeA;
+  const { x: xB, y: yB } = nodeB;
+
+  const startX = xA + wA - 5 - output.socket * 20;
+  const startY = yA + hA;
+
+  const endX = xB + 5 + input.socket * 20;
+  const endY = yB + 1;
+
+  return bezierPath(startX, startY, endX, endY);
+}
+function getNodeById(nodeId) {
+  return studio.nodes.find((n) => n.id === nodeId);
+}
 </script>
 
 <style lang="scss" scoped>
@@ -96,10 +88,8 @@ export default {
 
     &.selected {
       opacity: 1;
-      stroke: white
+      stroke: white;
     }
-
   }
-
 }
 </style>

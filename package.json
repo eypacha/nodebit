@@ -10,6 +10,8 @@
     "test:unit": "vitest"
   },
   "dependencies": {
+    "@vueuse/core": "^11.1.0",
+    "pinia": "^2.2.4",
     "vue": "^3.4.29",
     "vue-draggable-resizable": "^3.0.0"
   },

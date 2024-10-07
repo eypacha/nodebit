@@ -404,11 +404,20 @@ manual                -> Displa this message`,
 
     export: {
       name: 'Export',
-      description: 'Exports canvas as a JSON file.',
+      description: 'Exports bytebeat canvas as a JSON file.',
       inputs: 0,
       outputs: 0,
       editable: false,
       pattern: (content) => content === 'export',
+    },
+
+    import: {
+      name: 'Import',
+      description: 'Import nodebite canvas from a JSON.',
+      inputs: 0,
+      outputs: 0,
+      editable: false,
+      pattern: (content) => content === 'import',
     },
 
     exp: {

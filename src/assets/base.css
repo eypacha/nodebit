@@ -79,3 +79,8 @@ body {
   font-family: var(--main-font);
   font-optical-sizing: auto;
 }
+
+/* hidding google translating plugin  */
+#gtx-trans {
+  display: none !important;
+}

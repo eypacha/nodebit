@@ -10,20 +10,13 @@ export function generateUniqueId() {
 }
 
 export function getMousePosition(event, canvasRect = {left: 0, top:0 }) {
+
     const { clientX, clientY } = event;
+
     const { left, top } = canvasRect;
     return { x: clientX - left, y: clientY - top };
   }
-
-export function downloadFile(content, fileName, contentType) {
-  const blob = new Blob([content], { type: contentType });
-  const link = document.createElement('a');
-  link.href = URL.createObjectURL(blob);
-  link.download = fileName;
-  link.click();
-  URL.revokeObjectURL(link.href); // Limpiar el objeto URL después de usarlo
-}
-
+  
 export function copyToClipboard(text) {
   if (navigator.clipboard) {
     navigator.clipboard.writeText(text)

@@ -1,12 +1,12 @@
 <template>
     <header class="noselect">nodebit 0.0001</header>
-    <graph-canvas/>
+    <main>
+      <graph-canvas/>
+    </main>
 </template>
 
 <script>
 import GraphCanvas from "./components/GraphCanvas.vue";
-
-
 export default {
   data() {
     return {
@@ -14,7 +14,7 @@ export default {
     }
   },
   components: {
-    GraphCanvas
+    GraphCanvas,
   }
 };
 </script>
