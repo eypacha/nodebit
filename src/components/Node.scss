@@ -51,7 +51,9 @@
 
     &.node-play,
     &.node-export,
-    &.node-import {
+    &.node-import,
+    &.node-reset,
+    &.node-stop {
       color: var(--color-t);
       text-transform: uppercase;
       border-radius: 50%;

@@ -37,6 +37,15 @@ export const useStudioStore = defineStore("studio", {
         }
       }
     },
+    async stop() {
+      const result = await audioEngine.stop();
+      if (result) {
+        this.isPlaying = false;
+      }
+    },
+    async reset() {
+      const result = await audioEngine.reset();
+    },
     addNode(x, y) {
       const newNode = {
         id: generateUniqueId(),

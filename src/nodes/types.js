@@ -26,6 +26,24 @@ const NODE_TYPES = {
       pattern: (content) => content === 'play',
     },
 
+    stop: {
+      name: 'Stop',
+      description: 'Stop an reset the t variable',
+      inputs: 0,
+      outputs: 0,
+      editable: false,
+      pattern: (content) => content === 'stop',
+    },
+
+    reset: {
+      name: 'Reset',
+      description: 'Reset the t variable',
+      inputs: 0,
+      outputs: 0,
+      editable: false,
+      pattern: (content) => content === 'reset',
+    },
+
     help: {
       name: 'Help',
       description: 'Displays help information about a specific node.',

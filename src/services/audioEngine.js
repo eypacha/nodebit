@@ -12,7 +12,7 @@ class AudioEngine {
      */
   async initialize() {
 
-    if (!this.context) {
+    if(!this.context) {
       this.context = new (window.AudioContext || window.webkitAudioContext)();
       await this.context.resume();
       await ByteBeatNode.setup(this.context);
@@ -20,7 +20,8 @@ class AudioEngine {
       this.byteBeatNode.setType(ByteBeatNode.Type.byteBeat);
       this.byteBeatNode.setExpressionType(ByteBeatNode.ExpressionType.infix);
       this.byteBeatNode.setDesiredSampleRate(8000);
-    }
+      return true
+    } 
   }
 
   /**
@@ -30,6 +31,10 @@ class AudioEngine {
      */
   async play() {
     if (this.isPlaying) return false;
+
+    if(!this.context) {
+      await this.initialize()
+    }
 
     try {
       await this.initialize();
@@ -47,12 +52,39 @@ class AudioEngine {
    * Pauses the currently playing ByteBeat audio.
    * If audio is not playing, this method has no effect.
    */
-  pause() {
+  async pause() {
+    if(!this.context) {
+      await this.initialize()
+    }
+    this.byteBeatNode.reset();
     if (!this.isPlaying) return false;
-
     this.byteBeatNode.disconnect();
     this.isPlaying = false;
     return true;
+  }
+
+  /**
+   * Stop the currently playing ByteBeat audio.
+   * If audio is not playing, just reset the timer
+   */
+  async stop() {
+    if(!this.context) return true
+    this.byteBeatNode.reset();
+    if (!this.isPlaying) return 
+    this.byteBeatNode.disconnect();
+    this.isPlaying = false;
+    return true
+  }
+  
+  /**
+   * Reset the timer
+   */
+  async reset(){
+    if(!this.context) {
+      await this.initialize()
+    }
+    this.byteBeatNode.reset();
+    return true
   }
 
   /**

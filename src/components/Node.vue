@@ -41,6 +41,8 @@
     />
 
     <PlayNode v-else-if="node.type == 'play'" />
+    <StopNode v-else-if="node.type == 'stop'" />
+    <ResetNode v-else-if="node.type == 'reset'" />
     <ExportNode v-else-if="node.type == 'export'"/>
     <ImportNode v-else-if="node.type == 'import'"/>
     <EvaluatedNode v-else-if="node.type == 'evaluated'"/>
@@ -120,6 +122,8 @@ import EvaluatedNode from "./nodes/EvaluatedNode.vue";
 import ErrorsNode from "./nodes/ErrorsNode.vue";
 import SwitchNode from "./nodes/SwitchNode.vue";
 import HelpNode from "./nodes/HelpNode.vue";
+import StopNode from "./nodes/StopNode.vue";
+import ResetNode from "./nodes/ResetNode.vue";
 
 import { ref, computed, nextTick } from "vue";
 import { useStudioStore } from "@/stores/studio";
