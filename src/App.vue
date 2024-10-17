@@ -13,30 +13,11 @@
   </div>
 </template>
 <script setup>
-import { computed } from 'vue';
-import { useStudioStore } from "@/stores/studio";
+import { useFilterStyle } from '@/composables/useFilterStyle'; 
+const { computedStyle } = useFilterStyle();
 
 import GraphCanvas from "./components/GraphCanvas.vue";
 
-const store = useStudioStore();
-
-const computedStyle = computed(() => {
-  let filter = '';
-  
-  if (store.theme.darkMode === false) {
-    filter += 'invert(1) ';
-  }
-  
-  if (store.theme.greyscale === true) {
-    filter += 'grayscale(1)';
-  }
-
-  if (store.theme.hueRotation) {
-    filter += `hue-rotate(${store.theme.hueRotation}deg)`;
-  }
-
-  return { filter: filter.trim() };
-});
 </script>
 
 <style scoped>
