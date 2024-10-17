@@ -1,11 +1,16 @@
 <template>
-  <div class="noselect" @click="studio.stop">
+  <button class="noselect" @click="handleClick()">
     Stop
-  </div>
+  </button>
 </template>
 
 <script setup>
 import { useStudioStore } from "@/stores/studio";
 
-const studio = useStudioStore();
+const store = useStudioStore();
+
+function handleClick(){
+  if(!store.isDragging) return
+  store.stop()
+}
 </script>

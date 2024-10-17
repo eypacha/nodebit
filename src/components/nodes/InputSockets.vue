@@ -10,7 +10,7 @@
           :class="[
             `socket-${n - 1}`,
             {
-              active: studio.isConnectionActive(node.id, n - 1, 'input'),
+              active: store.isConnectionActive(node.id, n - 1, 'input'),
               switched: node.activeSocket == n - 1,
             },
           ]"
@@ -37,19 +37,19 @@
   
   const emit = defineEmits(['start-path', 'finish-path']);
   
-  const studio = useStudioStore();
+  const store = useStudioStore();
   
   function switchChange(socket) {
     if (props.node.type !== 'switch') return;
-    studio.switchChange(props.node.id, socket);
-    studio.updateNode(props.node.id, { activeSocket: socket });
+    store.switchChange(props.node.id, socket);
+    store.updateNode(props.node.id, { activeSocket: socket });
   }
 
 const newConnection = {
   id: generateUniqueId(),
   output: {
-    id: studio.connecting.value.nodeId,
-    socket: studio.connecting.value.socket,
+    id: store.connecting.value.nodeId,
+    socket: store.connecting.value.socket,
   },
   input: { id: props.node.id, socket: socket },
   active: isConnectionActive,
@@ -59,19 +59,19 @@ if (inputNode.type == "switch" && newConnection.active == true) {
   inputNode.activeSocket = newConnection.input.socket;
 }
 
-if (!studio.connectionExists(newConnection)) {
+if (!store.connectionExists(newConnection)) {
   
-  studio.connections.push(newConnection);
-  inputNode.lastSocketConnected = studio.getMaxConnectedInputSocket(nodeId);
-  studio.evaluateBytebeat();
+  store.connections.push(newConnection);
+  inputNode.lastSocketConnected = store.getMaxConnectedInputSocket(nodeId);
+  store.evaluateBytebeat();
 }
 
 if (inputNode.type == "help" && newConnection.active == true) {
-  const outputNode = studio.find("nodes", "id", connecting.node);
+  const outputNode = store.find("nodes", "id", connecting.node);
 
   const subgroup = NODE_TYPES[outputNode.type].descriptions;
 
-  studio.helpText.value = `NAME: ${
+  store.helpText.value = `NAME: ${
     subgroup
       ? subgroup[outputNode.content].name
       : NODE_TYPES[outputNode.type].name

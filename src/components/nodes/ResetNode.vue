@@ -1,11 +1,17 @@
 <template>
-  <div class="noselect" @click="studio.reset">
+  <button class="noselect" @click="handleClick">
     Reset
-  </div>
+  </button>
 </template>
 
 <script setup>
 import { useStudioStore } from "@/stores/studio";
 
-const studio = useStudioStore();
+const store = useStudioStore();
+
+
+function handleClick(){
+  if(!store.isDragging) return
+  store.reset()
+}
 </script>

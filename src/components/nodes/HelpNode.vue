@@ -15,7 +15,7 @@ const props = defineProps({
   connectionActive: Boolean,
 });
 
-const studio = useStudioStore();
+const store = useStudioStore();
 
 const DEFAULT_MESSAGE = 'Connect a node to display help message'
 
@@ -30,9 +30,9 @@ watch(() => props.connectionActive, (newValue, oldValue) => {
     isActive.value = newValue
 
     if(newValue) {
-        studio.setHelpText(props.nodeId)
+        store.setHelpText(props.nodeId)
     } else {
-        studio.updateNode(props.nodeId, { content: DEFAULT_MESSAGE})
+        store.updateNode(props.nodeId, { content: DEFAULT_MESSAGE})
     }
 
     
