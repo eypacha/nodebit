@@ -63,6 +63,9 @@ function calculateNodeBounds(store, margin = 0) {
 function applyCloneStyles(clonedDocument) {
   const style = clonedDocument.createElement("style");
   style.textContent = `
+  * {
+   box-shadow: none !important;
+  }
   .node-play,
   .node-stop,
   .node-reset,
