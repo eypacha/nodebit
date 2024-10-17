@@ -5,39 +5,27 @@
       :key="connection.id"
       :d="connection.path"
       fill="transparent"
-      :class="{ selected: studio.selectedConnections.includes(connection.id) }"
+      :class="{ selected: store.selectedConnections.includes(connection.id) }"
       stroke-width="2"
       tabindex="2"
-      @focus="studio.selectedConnection = connection.id"
-      @blur="studio.selectedConnection = null"
+      @focus="store.selectedConnection = connection.id"
+      @blur="store.selectedConnection = null"
       @click.exact.stop="handleConnectionClick(connection.id)"
-      @click.shift.exact.stop="studio.selectConnection(connection.id)"
+      @click.shift.exact.stop="store.selectConnection(connection.id)"
       :stroke-dasharray="connection.active ? 'none' : '4'"
-    />
-    <path
-      v-if="mode == 'routing'"
-      :d="bezierPath(pathData.x1, pathData.y1, pathData.x2, pathData.y2)"
-      fill="transparent"
-      stroke-width="2"
     />
   </svg>
 </template>
 
 <script setup>
 import { bezierPath } from "@/utils/helpers";
-
 import { computed } from "vue";
 import { useStudioStore } from "@/stores/studio";
 
-const studio = useStudioStore();
-
-const props = defineProps({
-  mode: String,
-  pathData: Object,
-});
+const store = useStudioStore();
 
 const computedConnections = computed(() => {
-  return studio.connections.map((connection) => ({
+  return store.connections.map((connection) => ({
     ...connection,
     path: pathNode2Node(connection.output, connection.input),
   }));
@@ -45,8 +33,8 @@ const computedConnections = computed(() => {
 
 
 function handleConnectionClick(connId) {
-  studio.deselectAll();
-  studio.selectConnection(connId);
+  store.deselectAll();
+  store.selectConnection(connId);
 }
 function pathNode2Node(output, input) {
 
@@ -65,7 +53,7 @@ function pathNode2Node(output, input) {
   return bezierPath(startX, startY, endX, endY);
 }
 function getNodeById(nodeId) {
-  return studio.nodes.find((n) => n.id === nodeId);
+  return store.nodes.find((n) => n.id === nodeId);
 }
 </script>
 
