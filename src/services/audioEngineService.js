@@ -3,6 +3,8 @@ class AudioEngine {
     this.context = null;
     this.byteBeatNode = null;
     this.isPlaying = false;
+    this.position = 0;
+    this.lastUpdateTime = 0;
   }
 
   /**
@@ -12,7 +14,7 @@ class AudioEngine {
      */
   async initialize() {
 
-    if(!this.context) {
+    if(!this.byteBeatNode) {
       this.context = new (window.AudioContext || window.webkitAudioContext)();
       await this.context.resume();
       await ByteBeatNode.setup(this.context);
@@ -20,6 +22,8 @@ class AudioEngine {
       this.byteBeatNode.setType(ByteBeatNode.Type.byteBeat);
       this.byteBeatNode.setExpressionType(ByteBeatNode.ExpressionType.infix);
       this.byteBeatNode.setDesiredSampleRate(8000);
+
+      this.stack = await this.byteBeatNode.createStack();
       return true
     } 
   }
@@ -32,7 +36,7 @@ class AudioEngine {
   async play() {
     if (this.isPlaying) return false;
 
-    if(!this.context) {
+    if(!this.byteBeatNode) {
       await this.initialize()
     }
 
@@ -53,10 +57,9 @@ class AudioEngine {
    * If audio is not playing, this method has no effect.
    */
   async pause() {
-    if(!this.context) {
+    if(!this.byteBeatNode) {
       await this.initialize()
     }
-    this.byteBeatNode.reset();
     if (!this.isPlaying) return false;
     this.byteBeatNode.disconnect();
     this.isPlaying = false;
@@ -68,7 +71,7 @@ class AudioEngine {
    * If audio is not playing, just reset the timer
    */
   async stop() {
-    if(!this.context) return true
+    if(!this.byteBeatNode) return true
     this.byteBeatNode.reset();
     if (!this.isPlaying) return 
     this.byteBeatNode.disconnect();
@@ -76,15 +79,48 @@ class AudioEngine {
     return true
   }
   
+  async getSamplesForVisualization(width) {
+    if (!this.byteBeatNode) {
+      await this.initialize();
+    }
+
+    const now = performance.now();
+    const elapsedTimeMS = now - this.lastUpdateTime;
+    this.lastUpdateTime = now;
+
+    if (this.isPlaying) {
+      const startTime = this.position;
+      const endTime = startTime + elapsedTimeMS * 0.001 * this.byteBeatNode.getDesiredSampleRate() | 0;
+      const duration = (endTime - startTime);
+      this.position = endTime;
+
+      const context = await this.byteBeatNode.createContext();
+      const leftValues = await this.byteBeatNode.getSamplesForTimeRange(startTime, endTime, width, context, this.stack, 0);
+      const rightValues = await this.byteBeatNode.getSamplesForTimeRange(startTime, endTime, width, context, this.stack, 1);
+
+      return { left: leftValues, right: rightValues };
+    }
+
+    return null;
+  }
   /**
    * Reset the timer
    */
   async reset(){
-    if(!this.context) {
-      await this.initialize()
+    this.position = 0;
+    this.lastUpdateTime = 0;
+
+    if (this.byteBeatNode) {
+      this.byteBeatNode.reset();
     }
-    this.byteBeatNode.reset();
-    return true
+  }
+
+  getTime() {
+
+    if(!this.byteBeatNode) return 0
+
+    const time = this.byteBeatNode.getTime() ?? 0;
+    return time
   }
 
   /**
