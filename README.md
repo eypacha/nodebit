@@ -2,7 +2,7 @@
 
 **Nodebit** is a web app for creating Bytebeat music using an interactive, node-based interface inspired by Pure Data. It allows you to connect and control nodes to explore and generate sound creatively.
 
-![Screenshot](public/screenshoot.png)
+![Screenshot](public/screenshot.png)
 
 Nodebit is built on top of the html5bytebeat library by Greggman, which provides the `ByteBeatNode` a [`AudioNode`](https://developer.mozilla.org/en-US/docs/Web/API/AudioNode) for generating and controlling audio. The app is developed using Vue 3 and is designed to offer an intuitive way to create music with minimal coding.
 
