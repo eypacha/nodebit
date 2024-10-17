@@ -1,60 +1,94 @@
 <template>
-  <div class="noselect" @click="fileInput.click()">
+  <button class="noselect" @click="handleClick()">
     import
-    <input
-      type="file"
-      ref="fileInput"
-      accept=".json"
-      value=""
-      @change="handleFileChange"
-    />
-  </div>
+  </button>
+  <input
+    type="file"
+    ref="fileInput"
+    accept=".b1t,.jpg"
+    value=""
+    @change="handleFileChange"
+  />
 </template>
 
 <script setup>
 import { ref } from "vue";
 import { useStudioStore } from "@/stores/studio";
+import piexif from 'piexifjs';
 
-const studio = useStudioStore();
-
+const store = useStudioStore();
 const fileInput = ref();
+
+function handleClick() {
+  if (!store.isDragging) return;
+  fileInput.value.click();
+}
 
 function handleFileChange(event) {
   const file = event.target.files[0];
   if (!file) return;
 
-  const reader = new FileReader();
+  const fileExtension = file.name.split('.').pop().toLowerCase();
 
+  if (fileExtension === 'b1t') {
+    handleB1TFile(file);
+  } else if (fileExtension === 'jpg') {
+    handleJPGFile(file);
+  } else {
+    console.error("Tipo de archivo no soportado");
+  }
+}
+
+function handleB1TFile(file) {
+  const reader = new FileReader();
   reader.onload = function (e) {
     const fileContent = e.target.result;
-
     try {
       const jsonData = JSON.parse(fileContent);
       console.log("Contenido del archivo JSON:", jsonData);
       restoreDataToStore(jsonData);
-
-      studio.fileContent = jsonData;
+      store.fileContent = jsonData;
     } catch (error) {
       console.error("Error al parsear el archivo JSON:", error);
     }
   };
-
   reader.readAsText(file);
 }
+
+function handleJPGFile(file) {
+  const reader = new FileReader();
+  reader.onload = function (e) {
+    const fileContent = e.target.result;
+    try {
+      const exifData = piexif.load(fileContent);
+      const software = exifData["0th"][piexif.ImageIFD.Software];
+      if (software === "nodebit") {
+        const userComment = exifData["Exif"][piexif.ExifIFD.UserComment];
+        const jsonData = JSON.parse(userComment);
+        console.log("Datos EXIF extraídos:", jsonData);
+        restoreDataToStore(jsonData);
+      } else {
+        console.error("El archivo JPG no fue creado por nodebit");
+      }
+    } catch (error) {
+      console.error("Error al procesar el archivo JPG:", error);
+    }
+  };
+  reader.readAsDataURL(file);
+}
+
 function restoreDataToStore(data) {
   if (!data.nodes || !data.connections || !data.expressions) return;
-
   if (data.nodes) {
-    studio.nodes = data.nodes;
+    store.nodes = data.nodes;
   }
   if (data.connections) {
-    studio.connections = data.connections;
+    store.connections = data.connections;
   }
   if (data.expressions) {
-    studio.expressions = data.expressions;
+    store.expressions = data.expressions;
   }
-
-  console.log("Datos restaurados en el store:", studio);
+  console.log("Datos restaurados en el store:", store);
 }
 </script>
 
