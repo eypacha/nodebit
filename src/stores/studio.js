@@ -1,10 +1,13 @@
 import { defineStore } from "pinia";
-import { audioEngine } from "@/services/audioEngine";
+import { audioEngine } from "@/services/audioEngineService";
 import { presets } from "@/utils/presets";
 import { NODE_TYPES } from "@/nodes/types";
 import { generateUniqueId, trimParens } from "@/utils/helpers";
 
+
 const { nodes, connections } = presets[0];
+
+const MAX_HISTORY = 50;
 
 export const useStudioStore = defineStore("studio", {
   state: () => ({
@@ -19,40 +22,166 @@ export const useStudioStore = defineStore("studio", {
     selectedNodes: [],
     selectedConnection: null,
     selectedConnections: [],
+    copiedNodes: [],
     pathData: {},
     connecting: {},
+    time: 0,
+    visualizationData: { left: null, right: null },
+    num: 0,
+    hasVisualizerNode: false,
+    visualizationInterval: null,
+    isDragging: false,
+    isResizing: false,
+    history: [],
+    historyIndex: -1,
   }),
   actions: {
+    initializeHistory() {
+      const initialState = {
+        nodes: this.nodes.map(node => ({ ...node })),
+        connections: this.connections.map(conn => ({
+          ...conn,
+          output: { ...conn.output },
+          input: { ...conn.input }
+        })),
+        selectedNodes: [...this.selectedNodes],
+        selectedConnections: [...this.selectedConnections],
+      };
+      this.history = [initialState];
+      this.historyIndex = 0;
+    },
+    saveState() {
+      console.info('💾 saveState')
+      const currentState = {
+        nodes: this.nodes.map(node => ({ ...node })),
+        connections: this.connections.map(conn => ({ 
+          ...conn, 
+          output: { ...conn.output }, 
+          input: { ...conn.input } 
+        })),
+        selectedNodes: [...this.selectedNodes],
+        selectedConnections: [...this.selectedConnections],
+      };
+
+      // Eliminar estados futuros si estamos en medio del historial
+      if (this.historyIndex < this.history.length - 1) {
+        this.history = this.history.slice(0, this.historyIndex + 1);
+      }
+
+      this.history.push(currentState);
+      if (this.history.length > MAX_HISTORY) {
+        this.history.shift();
+      }
+      this.historyIndex = this.history.length - 1;
+      console.log('💾 historyIndex',this.historyIndex)
+    },
+    undo() {
+      if (this.historyIndex > 0) {
+        this.historyIndex--;
+        console.log('↩️ undo','historyIndex',this.historyIndex)
+        this.applyState(this.history[this.historyIndex]);
+        
+      }
+    },
+    redo() {
+      if (this.historyIndex < this.history.length - 1) {
+        this.historyIndex++;
+        console.log('↪️ redo', 'historyIndex', this.historyIndex);
+        this.applyState(this.history[this.historyIndex]);
+      }
+    },
+    applyState(state) {
+      console.log('aplyState',this.historyIndex,'of',this.history.length)
+      this.nodes = state.nodes;
+      this.connections = state.connections;
+      this.selectedNodes = state.selectedNodes;
+      this.selectedConnections = state.selectedConnections;
+    },
+    setIsDragging(value) {
+      this.isDragging = value
+      console.log('🖱 setIsDragging',value)
+      if(!this.isDragging) {
+        this.saveState()
+      }
+    },
+    setIsResizing(value) {
+      this.isResizing = value
+      if(!this.isResizing) {
+        this.saveState()
+      }
+    },
+    async updateVisualization(width) {
+      this.visualizationData = await audioEngine.getSamplesForVisualization(width);
+    },
+    startRendering() {
+
+      if (this.visualizationInterval) {
+        clearInterval(this.visualizationInterval);
+      }
+    
+      const updateTime = () => {
+      
+        if(this.isPlaying) {
+          const time = audioEngine.getTime();
+          this.time = time;
+          requestAnimationFrame(updateTime)
+        }
+      }
+
+      const updateVisualization = () => {
+        if (this.isPlaying) {
+          if (this.hasVisualizerNode) {
+            this.updateVisualization(256); 
+          }
+        } else {
+          
+          clearInterval(this.visualizationInterval);
+        }
+      };
+    
+      requestAnimationFrame(updateTime)
+      this.visualizationInterval = setInterval(updateVisualization, 128);
+    },
     async playPause() {
       if (!this.isPlaying) {
         const result = await audioEngine.play();
+        
+        this.hasVisualizerNode = this.nodes.some(node => node.type === 'visualizer');
+
         audioEngine.setExpressions([...this.expressions]);
         if (result) {
           this.isPlaying = true;
+          this.startRendering()
         }
       } else {
         const result = audioEngine.pause();
         if (result) {
           this.isPlaying = false;
+          this.startRendering()
         }
       }
     },
     async stop() {
+      
       const result = await audioEngine.stop();
+      this.time = 0
       if (result) {
         this.isPlaying = false;
+        this.visualizationData = null;
       }
     },
     async reset() {
-      const result = await audioEngine.reset();
+      await audioEngine.reset();
+      this.time = 0
+      this.visualizationData = null;
     },
     addNode(x, y) {
       const newNode = {
         id: generateUniqueId(),
         type: "empty",
         content: "",
-        w: 60,
-        h: 40,
+        w: 65,
+        h: 44,
         x: x,
         y: y,
       };
@@ -74,16 +203,92 @@ export const useStudioStore = defineStore("studio", {
           connection.output.id !== nodeId && connection.input.id !== nodeId
       );
 
-      if (!this.nodes.some((node) => node.type == "play")) {
-        this.stop();
-      }
-
-      this.evaluateBytebeat();
+      this.hasVisualizerNode = this.nodes.some((node) => node.type == "visualizer")
     },
     deleteSelectedNodes() {
+      if(this.selectedNodes.length === 0) return
+      
       this.selectedNodes.forEach((nodeId) => {
         this.deleteNode(nodeId);
       });
+
+      if (!this.nodes.some((node) => node.type == "play" || node.type == "stop")) this.stop();
+    },
+    copySelection() {
+      this.copiedNodes = [...this.selectedNodes];
+    },
+    pasteSelection(mousePosition) {
+
+      const startTime = Date.now()
+      console.log('⏰ startTime:',startTime)
+      this.saveState();
+      this.deselectAll();
+
+      const copiedNodes = this.copiedNodes.map(nodeId => this.find("nodes", "id", nodeId));
+  
+      const deltaX = Math.min(...copiedNodes.map(node => node.x));
+      const deltaY = Math.min(...copiedNodes.map(node => node.y));
+
+      const newIdsMap = new Map();
+
+      copiedNodes.forEach(copiedNode => {
+        const newNode = {
+          ...copiedNode,
+          id: generateUniqueId(),
+          x: mousePosition.x + (copiedNode.x - deltaX),
+          y: mousePosition.y + (copiedNode.y - deltaY),
+        };
+        this.nodes.push(newNode);
+    
+        newIdsMap.set(copiedNode.id, newNode.id);
+      });
+
+      let newConnectionCounter = 0
+      this.connections.forEach(connection => {
+        const isInputCopied = newIdsMap.has(connection.input.id);
+        const isOutputCopied = newIdsMap.has(connection.output.id);
+    
+        if (isInputCopied && isOutputCopied) {
+          const newConnection = {
+            ...connection,
+            id: generateUniqueId(),
+            input: {
+              ...connection.input,
+              id: isInputCopied ? newIdsMap.get(connection.input.id) : connection.input.id
+            },
+            output: {
+              ...connection.output,
+              id: isOutputCopied ? newIdsMap.get(connection.output.id) : connection.output.id
+            }
+          };
+    
+          this.connections.push(newConnection);
+          newConnectionCounter++
+        }
+      });
+
+      const duration = Date.now() - startTime
+      console.log('⏰ Method took',duration,"ms.", copiedNodes.length, "nodos",newConnectionCounter,"cononectores")
+      
+    },
+    addNode(x, y) {
+      const newNode = {
+        id: generateUniqueId(),
+        type: "empty",
+        content: "",
+        w: 65,
+        h: 44,
+        x: x,
+        y: y,
+      };
+
+      this.nodes.push(newNode);
+
+      console.log(newNode.id);
+
+      this.deselectAll();
+
+      return newNode.id;
     },
     deleteConnection(connId) {
       const connection = this.find("connections", "id", connId);
@@ -92,31 +297,36 @@ export const useStudioStore = defineStore("studio", {
 
       this.connections = this.connections.filter((conn) => conn.id !== connId);
 
-      inputNode.lastSocketConnected = this.getMaxConnectedInputSocket(
-        inputNode.id
-      );
+      inputNode.lastSocketConnected = this.getMaxConnectedInputSocket(inputNode.id);
 
-      if (!wasActive || inputNode.type === "conmut") {
-        this.evaluateBytebeat();
-        return;
-      }
+      if (!wasActive || inputNode.type === "conmut") return;
 
-      const sameNodeInputConnection = this.connections.find(
+      const nextConnection = this.connections.find(
         (conn) =>
           conn.input.id === inputNode.id &&
           conn.input.socket === connection.input.socket
       );
 
-      if (sameNodeInputConnection) {
-        sameNodeInputConnection.active = true;
+      if (nextConnection) {
+        nextConnection.active = true;
       }
-
-      this.evaluateBytebeat();
     },
-    deleteSelecteConnections() {
+    toggleConnection(connId) {
+      console.log('toggleConnection',connId)
+      const connection = this.find("connections", "id", connId);
+      connection.active = !connection.active;
+    },
+    deleteSelectedConnections() {
       this.selectedConnections.forEach((nodeId) => {
         this.deleteConnection(nodeId);
       });
+    },
+    toggleSelectedConnections() {
+      console.log('toggling connections')
+      this.selectedConnections.forEach((nodeId) => {
+        this.toggleConnection(nodeId);
+      });
+      this.evaluateBytebeat();
     },
     deselectAll() {
       this.selectedNodes = [];
@@ -141,6 +351,7 @@ export const useStudioStore = defineStore("studio", {
       }
     },
     updateNode(nodeId, updatedProps) {
+
       const index = this.nodes.findIndex((node) => node.id === nodeId);
       if (index === -1) return;
 
@@ -149,10 +360,15 @@ export const useStudioStore = defineStore("studio", {
         ...updatedProps,
       };
 
+      console.log('updateNode',nodeId, updatedProps)
+
       this.nodes.splice(index, 1, updatedNode);
 
+    
       if (updatedProps.type) {
+
         this.checkInvalidConnections(index);
+        
       }
 
       if (
@@ -162,6 +378,8 @@ export const useStudioStore = defineStore("studio", {
       ) {
         this.evaluateBytebeat();
       }
+
+      if(updatedProps.type == 'visualizer') this.hasVisualizerNode = true
     },
     checkInvalidConnections(nodeIndex) {
       const node = this.nodes[nodeIndex];
@@ -199,11 +417,12 @@ export const useStudioStore = defineStore("studio", {
       return maxSocket;
     },
     async evaluateBytebeat() {
+      console.trace('🧮 Evaluating')
       try {
         const outputNode = this.find("nodes", "type", "out");
 
         if (!outputNode) {
-          console.error("No output node found");
+          console.warn("🔌 No output node found");
           this.error = "No output node found";
           audioEngine.pause();
           return "0";
