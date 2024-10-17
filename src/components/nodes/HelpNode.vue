@@ -39,7 +39,7 @@ watch(() => props.connectionActive, (newValue, oldValue) => {
 });
 </script>
 
-<style lang="css" scoped>
+<style lang="scss" scoped>
 .content {
   width: 100%;
   height: 100%;
