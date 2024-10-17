@@ -1,4 +1,5 @@
 <template>
+  <div :style="computedStyle" class="content">
     <header class="noselect">
       <nav>
         <img src="/public/favicon-32x32.png" alt="Nodebit" />  
@@ -9,23 +10,41 @@
     <main>
       <graph-canvas/>
     </main>
+  </div>
 </template>
+<script setup>
+import { computed } from 'vue';
+import { useStudioStore } from "@/stores/studio";
 
-<script>
 import GraphCanvas from "./components/GraphCanvas.vue";
-export default {
-  data() {
-    return {
 
-    }
-  },
-  components: {
-    GraphCanvas,
+const store = useStudioStore();
+
+const computedStyle = computed(() => {
+  let filter = '';
+  
+  if (store.theme.darkMode === false) {
+    filter += 'invert(1) ';
   }
-};
+  
+  if (store.theme.greyscale === true) {
+    filter += 'grayscale(1)';
+  }
+
+  if (store.theme.hueRotation) {
+    filter += `hue-rotate(${store.theme.hueRotation}deg)`;
+  }
+
+  return { filter: filter.trim() };
+});
 </script>
 
 <style scoped>
+
+.content {
+  height: 100%;
+  background-color: #17111f;
+}
 header {
   padding: .5rem;
   color: cyan;

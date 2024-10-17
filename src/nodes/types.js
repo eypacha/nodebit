@@ -55,6 +55,18 @@ const NODE_TYPES = {
       pattern: (content) => content === 'help',
     },
 
+    theme: {
+      name: 'Theme',
+      description: 'Change between, style themes',
+      inputs: 0,
+      outputs: 0,
+      minWidth: 230,
+      minHeight: 190,
+      editable: false,
+      resizable: false,
+      pattern: (content) => content === 'theme',
+    },
+
     manual: {
       name: 'Manual',
       description: 'Displays the user manual.',

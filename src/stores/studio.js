@@ -34,6 +34,11 @@ export const useStudioStore = defineStore("studio", {
     isResizing: false,
     history: [],
     historyIndex: -1,
+    theme: {
+      darkMode: true,
+      greyscale: false,
+      hueRotation: 0
+    }
   }),
   actions: {
     initializeHistory() {
