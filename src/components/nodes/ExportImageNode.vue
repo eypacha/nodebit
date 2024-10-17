@@ -26,7 +26,6 @@ async function handleExport() {
     await exportImageService(store);
   } catch (error) {
     console.error('Error exporting image:', error);
-    // Aquí podrías mostrar un mensaje de error al usuario
   } finally {
     isLoading.value = false;
   }
