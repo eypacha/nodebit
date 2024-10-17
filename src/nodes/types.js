@@ -61,9 +61,9 @@ const NODE_TYPES = {
       inputs: 0,
       outputs: 0,
       editable: true,
-      minWidth: 479,
-      minHeight: 416,
-      content: "// nodebit v0.0001\n\nCtrl + Click          -> Create new empty node\nAlt + Click           -> Delete node or path\nClick                 -> Select a node\nDouble click          -> Edit node \nShift + Enter         -> New line\nEnter                 -> Evaluate node\nDel / Backspace       -> Delete selected path or node\nT hover a path        -> Toggle ghost connection\n1,2,3,4....           -> Change paths in selected switch node\n\nNODE_TYPES\nAutodetect type when the node is evaluated\n\nt                     -> Time variable\n14, .5, 0xFF, 0b1010  -> Number\n+ - * / %             -> Operators\n! & | ^ >> <<         -> Logic and bytewise operatros\n+[] &[] |[]...        -> Array operators\nplay                  -> Play/pause button\nexport                -> Export byte to JSON\nimport                -> Import JSON file\nout                   -> Main output to evaluate\nevaluated             -> Evaluated expressions\nswitch                -> Selects between multiple inputs\nmouse                 -> Get mouse (X,Y) position\nhelp                  -> Displays help about a specific node\nmanual                -> Displays this message\nsin, cos, tan, sqr    -> All JavaScript Math functions\n((t >> 10) & 42       -> Expression (default node)",
+      minWidth: 554,
+      minHeight: 500,
+      content: "// nodebit v0.0001\n\nCtrl + Click          -> Create new empty node\nClick                 -> Select a node\nDouble click          -> Edit node \nShift + Enter         -> New line\nEnter                 -> Evaluate node\nDel / Backspace       -> Delete selected path or node\n1,2,3,4....           -> Change paths in selected switch node\n\nNODE_TYPES\nAutodetect type when the node is evaluated\n\nt                     -> Time variable (click get the value)\n14, .5, 0xFF, 0b1010  -> Number\n+ - * / %             -> Operators\n! & | ^ >> <<         -> Logic and bytewise operatros\n+[] &[] |[]...        -> Array operators\nplay                  -> Play/pause button\nexport                -> Export byte to JSON\nimport                -> Import JSON file\nout                   -> Main output to evaluate\neval                  -> Evaluated expressions\nvisualizer / visual   -> Visualizer\nswitch                -> Selects between multiple inputs\nmouse                 -> Get mouse (X,Y) position\nhelp                  -> Displays help about a specific node\nmanual                -> Displays this message\nsin, cos, tan, sqr    -> All JavaScript Math functions\n((t >> 10) & 42       -> Expression (default node)",
       pattern: (content) => content === 'manual',
     },
 
@@ -361,6 +361,7 @@ const NODE_TYPES = {
       description: 'Represents a constant numeric value. Represents a numeric value that can be in various bases, including decimal, octal, binary, and hexadecimal.',
       inputs: 0,
       outputs: 1,
+      minWidth: 110,
       editable: true,
       pattern: (content) => !isNaN(parseFloat(content)) && isFinite(content),
     },
@@ -382,7 +383,7 @@ const NODE_TYPES = {
       editable: false,
       minWidth: 72,
       minHeight: 41,
-      maxWidth: 312,
+      maxWidth: 315,
       pattern: (content) => content === 'switch',
     },
     
@@ -391,8 +392,20 @@ const NODE_TYPES = {
       description: 'Provides the current time variable.',
       inputs: 0,
       outputs: 1,
-      editable: true,
+      minWidth: 90,
+      editable: false,
       pattern: (content) => content === 't',
+    },
+
+    visualizer: {
+      name: 'Visualizer',
+      description: 'Provides the current time variable.',
+      inputs: 0,
+      outputs: 0,
+      minWidth: 256,
+      minHeight: 150,
+      editable: false,
+      pattern: (content) => ['visualizer','visual'].includes(content),
     },
 
     export: {
@@ -402,6 +415,15 @@ const NODE_TYPES = {
       outputs: 0,
       editable: false,
       pattern: (content) => content === 'export',
+    },
+
+    exportImg: {
+      name: 'ExportIMG',
+      description: 'Exports bytebeat canvas as a JPG file.',
+      inputs: 0,
+      outputs: 0,
+      editable: false,
+      pattern: (content) => content === 'exportimg',
     },
 
     import: {
