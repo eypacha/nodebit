@@ -19,53 +19,48 @@
     @focus="handleFocus"
     @keydown="handleKeyDown"
     @keyup.stop="handleNodeKeyUp"
-    @dragstart="editable = false"
-    @dragging="handleDrag"
+    @dragStart="store.setIsDragging(true)"
+    @dragStop="store.setIsDragging(false)"
+    @dragging="handleDragging"
     @mousedown.stop
     @mouseup.stop
     @click.ctrl.stop
     @click.exact.stop="handleNodeClick(node.id, $event)"
-    @click.shift.exact.stop="studio.toggleSelection(node.id)"
+    @click.shift.exact.stop="store.toggleSelection(node.id)"
+    @resizeStart="store.setIsResizing(true)"
+    @resizeStop="store.setIsResizing(false)"
     @resizing="handleResizing"
   >
-    <textarea
-      v-if="nodeType.editable"
-      ref="textarea"
-      :class="{ noselect: !editable }"
-      :readOnly="!editable"
-      @blur="handleBlur"
-      role="textbox"
-      v-model="node.content"
-      @input="updateSize"
-      @keypress.enter.exact.prevent="handleEnter"
-    />
 
-    <PlayNode v-else-if="node.type == 'play'" />
-    <StopNode v-else-if="node.type == 'stop'" />
-    <ResetNode v-else-if="node.type == 'reset'" />
-    <ExportNode v-else-if="node.type == 'export'"/>
-    <ImportNode v-else-if="node.type == 'import'"/>
-    <EvaluatedNode v-else-if="node.type == 'evaluated'"/>
-    <ErrorsNode v-else-if="node.type == 'errors'"/>
-    <SwitchNode v-else-if="node.type == 'switch'" :node="node"/>
-    <HelpNode v-else-if="node.type == 'help'"
+    
+    <TextNode v-if="['exp','empty','comment'].includes(node.type)" ref="textNodeRef":node="node" :editable="editable" @blur="handleBlur"/>
+    <NumberNode v-else-if="node.type === 'number'" :node="node" :editable="editable" @blur="handleBlur"/>
+    <PlayNode v-else-if="node.type === 'play'" />
+    <StopNode v-else-if="node.type === 'stop'" />
+    <ResetNode v-else-if="node.type === 'reset'" />
+    <ExportNode v-else-if="node.type === 'export'"/>
+    <ExportImageNode v-else-if="node.type === 'exportImg'"/>
+    <ImportNode v-else-if="node.type === 'import'"/>
+    <EvaluatedNode v-else-if="node.type === 'evaluated'"/>
+    <ErrorsNode v-else-if="node.type === 'errors'"/>
+    <TimeNode v-else-if="node.type === 'time'"/>
+    <Visualizer v-else-if="node.type === 'visualizer'"/>
+    <OperatorNode v-else-if="node.type == 'operator'" :node="node"/>
+    <SwitchNode v-else-if="node.type === 'switch'" :node="node"/>
+    <HelpNode v-else-if="node.type === 'help'"
       :nodeId="node.id"
       :content="node.content"
-      :connectionActive="studio.isConnectionActive(node.id, 0, 'input')"/>
+      :connectionActive="store.isConnectionActive(node.id, 0, 'input')"/>
     <div v-else-if="node.type == 'out'" class="content noselect">out</div>
+    
 
-    <div v-else-if="node.type == 'conmut'" class="content noselect">
-      {{ node.content }}
-    </div>
-
-    <div v-else class="content noselect" style="color: cyan !important">
-      {{ node.content }}
-    </div>
+    <div v-else class="content noselect" style="color: cyan !important">{{ node.content }}</div>
 
     <div v-if="nodeType.inputs" class="inputs">
       <div
         v-for="n in nodeType.inputs"
         :key="`input-socket-${n - 1}`"
+        v-memo="[store.isConnectionActive(node.id, n - 1, 'input'), node.activeSocket === n - 1]"
         class="socket-wrapper"
       >
         <div
@@ -73,7 +68,7 @@
           :class="[
             `socket-${n - 1}`,
             {
-              active: studio.isConnectionActive(node.id, n - 1, 'input'),
+              active: store.isConnectionActive(node.id, n - 1, 'input'),
               switched: node.activeSocket == n - 1,
             },
           ]"
@@ -98,7 +93,7 @@
           class="socket"
           :class="
             (`socket-${n - 1}`,
-            { active: studio.isConnectionActive(node.id, n - 1, 'output') })
+            { active: store.isConnectionActive(node.id, n - 1, 'output') })
           "
           @mousedown="$emit('start-path', node.id, n - 1)"
         />
@@ -111,21 +106,28 @@
 </template>
 
 <script setup>
-import VueDraggableResizable from "vue-draggable-resizable";
-import { NODE_TYPES, getNodeType } from "@/nodes/types";
+import { ref, computed } from "vue";
 
-// import NodeSockets from "./nodes/NodeSockets.vue";
+import VueDraggableResizable from "vue-draggable-resizable";
+import { NODE_TYPES } from "@/nodes/types";
+
+import TextNode from "./nodes/TextNode.vue";
+import NumberNode from "./nodes/NumberNode.vue";
 import PlayNode from "./nodes/PlayNode.vue";
 import ExportNode from "./nodes/ExportNode.vue";
+import ExportImageNode from "./nodes/ExportImageNode.vue";
 import ImportNode from "./nodes/ImportNode.vue";
 import EvaluatedNode from "./nodes/EvaluatedNode.vue";
 import ErrorsNode from "./nodes/ErrorsNode.vue";
 import SwitchNode from "./nodes/SwitchNode.vue";
 import HelpNode from "./nodes/HelpNode.vue";
+import OperatorNode from "./nodes/OperatorNode.vue";
 import StopNode from "./nodes/StopNode.vue";
 import ResetNode from "./nodes/ResetNode.vue";
+import TimeNode from "./nodes/TimeNode.vue";
+import Visualizer from './nodes/VisualizerNode.vue';
 
-import { ref, computed, nextTick } from "vue";
+
 import { useStudioStore } from "@/stores/studio";
 
 import "./Node.scss";
@@ -137,14 +139,14 @@ const props = defineProps({
   lastSocketConnected: Number,
 });
 
-const studio = useStudioStore();
+const store = useStudioStore();
 
 const editable = ref(false)
 
-const textarea = ref(null)
+const textNodeRef = ref(null)
 
 const isSelected = computed(()=> {
-  return studio.selectedNodes.includes(props.node.id)
+  return store.selectedNodes.includes(props.node.id)
 })
 
 const nodeType = computed(()=>{
@@ -153,17 +155,21 @@ const nodeType = computed(()=>{
 
 const nodeMinWidth = computed(() => {
   if (props.node.type === "switch") {
-    return props.node.lastSocketConnected ? props.node.lastSocketConnected * 20 + 12 : 72;
+    return props.node.lastSocketConnected ? props.node.lastSocketConnected * 20 + 14 : 75;
   }
 
   return nodeType?.minWidth ?? 60;
 });
 
 const nodeMinHeight = computed(() => {
-  return nodeType?.minHeight ?? 41;
+  return nodeType?.minHeight ?? 44;
 });
 
 const nodeMaxWidth = computed(() => {
+
+  if(props.node.type === "switch") {
+    return 315
+  }
   return nodeType?.maxWidth ?? null;
 });
 
@@ -172,52 +178,85 @@ const nodeMaxHeight = computed(() => {
 });
 
 function handleFocus() {
-  console.log('focus')
-  studio.selectNode(props.node.id)
+  console.log('🔎 focus in node',props.node.type)
+  store.selectNode(props.node.id)
 }
 
 function focusAndEdit() {
   editable.value = true;
-  textarea.value.focus()
+  textNodeRef.value?.focus()
 }
 
 defineExpose({
   focusAndEdit
 });
 
-
 function handleBlur() {
   editable.value = false;
+  console.log('🔎 lost focus')
   if (props.node.type !== "empty" || props.node.content.trim() != "") return;
-  studio.deleteNode(props.node.id);
+  store.deleteNode(props.node.id);
 }
-function handleDrag(left, top) {
-  studio.updateNode(props.node.id, {x: left, y: top})
+
+function handleDragging(left, top) {
+
+  const deltaX = left - props.node.x;
+  const deltaY = top - props.node.y;
+
+ // Mueve el nodo principal
+  store.updateNode(props.node.id, { x: left, y: top });
+
+  // Mueve los nodos seleccionados, manteniendo las posiciones relativas
+  store.selectedNodes.forEach(nodeId => {
+    if (nodeId !== props.node.id) { // Evita volver a mover el nodo principal
+      const node = store.find("nodes", "id", nodeId);
+      const newLeft = node.x + deltaX;
+      const newTop = node.y + deltaY;
+      store.updateNode(nodeId, { x: newLeft, y: newTop });
+    }
+  });
 }
+
 function handleResizing(left, top, width, height) {
-  studio.updateNode(props.node.id, {w: width})
-}
-function handleEnter(event) {
-  updateNode(event);
-  studio.evaluateBytebeat()
+  store.updateNode(props.node.id, {w: width})
 }
 
 function handleNodeClick(){
-  studio.deselectAll()
-  studio.selectNode(props.node.id)
+  store.deselectAll()
+  store.selectNode(props.node.id)
 }
 
 function handleKeyDown(event) {
-  const keyPressed = parseInt(event.key);
+  let keyPressed = parseInt(event.key);
+
+  if(event.ctrlKey && event.code === "KeyC" && !editable.value) {
+    store.copySelection()
+  }
+
+  if (isNaN(keyPressed)) {
+    const letterMap = {
+      'a': 1,
+      'b': 12,
+      'c': 13,
+      'd': 14,
+      'e': 15,
+      'f': 16
+    };
+    keyPressed = letterMap[event.key.toLowerCase()]; // Convertimos a minúscula para asegurar que capture 'A-F' también
+  }
+
 
   switch(props.node.type){
     case 'switch':
       if (isNaN(keyPressed)) return;
       let socketIndex = keyPressed === 0 ? 9 : keyPressed - 1;
-      studio.switchChange(props.node.id, socketIndex);
-      studio.updateNode(props.node.id, {activeSocket: socketIndex });
+      store.switchChange(props.node.id, socketIndex);
+      store.updateNode(props.node.id, { activeSocket: socketIndex });
       break;
     case 'operator':
+      //
+      break;
+
   }
 
  
@@ -225,66 +264,23 @@ function handleKeyDown(event) {
 function handleNodeKeyUp(event) {
   if (event.key == "Delete" || event.key == "Backspace") {
     if (editable.value) return;
-    studio.deleteNode(props.node.id);
+    console.log('handlekeydown en nodo')
+    store.deleteNode(props.node.id);
+    store.evaluateBytebeat()
   }
 
   if (event.key == "Escape") {
     if (editable) {
       editable.value = false;
-      studio.updateNode(props.node.id,{...props.node})
+      store.updateNode(props.node.id,{...props.node})
     }
   }
 }
-function updateSize() {
 
-  if(!textarea.value) return
-
-  textarea.value.style.height = "0";
-  textarea.value.style.height = textarea.value.scrollHeight + "px";
-
-  nextTick().then(() => {
-    const el = textarea.value.getBoundingClientRect();
-    const h = el.height;
-    studio.updateNode(props.node.id, {h})
-  });
-}
-function updateNode() {
-  let { content, w, h } = props.node;
-  content = content.trim();
-
-  let type = getNodeType(content);
-  const minWidth = NODE_TYPES[type]?.minWidth || 60;
-  const minHeight = NODE_TYPES[type]?.minHeight || 41;
-
-  if (type === "switch") {
-    w = minWidth;
-    h = 41;
-  } else if (type === "exp") {
-    w = Math.max(w, minWidth);
-    content = content === "exp" ? "" : content;
-  } else if (type === "manual") {
-    type = "comment";
-    w = NODE_TYPES["manual"].minWidth;
-    h = NODE_TYPES["manual"].minHeight;
-    content = NODE_TYPES["manual"].content;
-  } else if (type === "help") {
-    w = minWidth;
-    h = minHeight;
-  }
-
-  if (!NODE_TYPES[type].editable) editable.value = false;
-
-  studio.updateNode(props.node.id, {content, type, w, w})
-
-  if (!editable) return;
-
-  nextTick().then(() => updateSize())
-  
-}
-function switchChange(socket) {
+function switchChange(socketIndex) {
   if (props.node.type !== "switch") return;
-  this.$emit("switch-change", props.node.id, socket - 1);
-  studio.updateNode(props.node.id, {activeSocket: socket - 1 })
-  
+
+  store.switchChange(props.node.id, socketIndex);
+  store.updateNode(props.node.id, { activeSocket: socketIndex })
 }
 </script>

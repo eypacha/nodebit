@@ -16,7 +16,7 @@
   
     &.selected {
       outline: solid 1px rgba(255, 255, 255, 1);
-      background: color-mix(in srgb, var(--color-background), white 4%);
+      background: #21192d;
       z-index: 2 !important;
     }
 
@@ -26,8 +26,19 @@
 
       textarea {
         cursor: text;
+
+      &::-moz-selection {
+          color: rgba(255, 255, 255, 0.75);
+          background: #c542c18b;
+        }
+        
+        &::selection {
+          color: rgba(255, 255, 255, 0.75);
+          background: #c542c157;
+        }
       }
     }
+
   
     textarea {
       width: 100%;
@@ -36,29 +47,73 @@
       border: 1px none white;
       padding: 13px 0.5em;
       cursor: pointer;
-      text-align: center;
+      text-align: left;
       resize: none;
       overflow: hidden;
       width: inherit;
       height: inherit;
       font-family: var(--main-font);
+      font-size: 13px;
       font-optical-sizing: auto;
+      box-shadow: black 0px 2px 8px inset;
+
+      &::-webkit-scrollbar {
+        width: 7px;
+      }
+
+      &::-webkit-scrollbar-thumb { 
+        background: #c542c157;
+        border-radius: 10px;
+      }
+
+      &::-webkit-scrollbar-track { 
+        background: transparent;
+        border-radius: 10px;
+        
+      }
   
       &:focus {
         outline: none;
       }
     }
 
+
+    // &.node-empty {
+    //   width: min-content !important;
+    //   textarea {
+    //     width: 100%;
+    //   }
+    // }
     &.node-play,
     &.node-export,
+    &.node-exportImg,
     &.node-import,
     &.node-reset,
     &.node-stop {
-      color: var(--color-t);
-      text-transform: uppercase;
       border-radius: 50%;
       height: auto !important;
       aspect-ratio: 1 !important;
+      box-shadow: black 0 2px 8px;
+
+      button {
+        text-transform: uppercase;
+        background-color: transparent;
+        border: none;
+        color: var(--color-t);
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        font-size: 12px;
+        cursor: pointer;
+
+        &:hover {
+          color: rgb(10, 255, 210);
+        }
+        &:active {
+          font-size: 11px;
+        }
+      }
+      
     }
 
     &.node-out {
@@ -66,33 +121,30 @@
       color: var(--color-t);
       text-transform: uppercase;
       padding-top: .5rem;
+      box-shadow: black 0 2px 8px;
 
     }
 
     &.node-errors {
       color: rgb(255, 34, 0);
       min-width: 400px;
-      justify-content: flex-start;
       padding: .4rem .7rem;
-
-      .content {
-        text-align: left;
-      }
       
+    }
+
+    &.node-mouse {
+      box-shadow: black 0 2px 8px;
     }
   
     &.node-evaluated {
-      text-align: left;
-      justify-content: flex-start;
       padding: .4rem .7rem;
       font-size: 10pt;
       min-width: 400px;
       min-height: 60px;
-    }
+      box-shadow: black 0px 2px 8px inset;
 
-    &.node-exp {
-      textarea {
-        text-align: left;
+      .content {
+        width: 100%;
       }
     }
 
@@ -100,17 +152,29 @@
       min-height: 200px;
     }
 
+    &.node-visualizer {
+      min-width: 256px !important;
+      height: min-content !important;
+    }
+
     &.node-number,
-    &.node-time  {
+    &.node-time {
+      border-radius: 20px 20px 0 20px;
+
       textarea {
         color: yellow;
+        text-align: right;
       }
+
     }
+
 
     &.node-comment {
       textarea {
         color: grey;
-        text-align: left;
+        overflow-y: visible;
+        scrollbar-gutter: stable;
+        max-height: 500px;
       }
     }
 
@@ -118,7 +182,13 @@
     &.node-negation {
       textarea {
         color: var(--color-t);
+        text-align: center;
       }
+    }
+
+    &.node-function,
+    &.node-function2 {
+      box-shadow: black 0 2px 8px;
     }
 
     &.node-out,
@@ -130,10 +200,7 @@
         text-align: center;
         text-transform: uppercase;
       }
-    }
-
-    &.node-time {
-      border-radius: 20px 20px 0 20px;
+      box-shadow: black 0 2px 8px;
     }
 
     &.node-conmut {
@@ -178,7 +245,7 @@
       width: 100%;
       display: flex;
       flex-wrap: wrap;
-      height: 13px;
+      height: 14px;
     }
   
     .inputs {
@@ -214,6 +281,7 @@
       &.active {
         background: var(--color-command);
       }
+
     }
 
 
@@ -225,5 +293,9 @@
       display: block;
       line-height: 1;
       padding-top: 2px;
+
+      &:hover {
+        color: yellow;
+      }
     }
   }
