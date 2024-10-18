@@ -93,7 +93,6 @@ function updateNode() {
     const chars = props.node.content.length;
 
     w = chars * 7.8 + 70
-
   
   } else if (type === "manual") {
     type = "comment";
@@ -103,6 +102,10 @@ function updateNode() {
   } else {
     w = minWidth;
     h = minHeight;
+  }
+
+  if(type === 'toggle') {
+    content = 0
   }
 
   store.updateNode(props.node.id, { content, type, w, h });

@@ -463,6 +463,9 @@ export const useStudioStore = defineStore("studio", {
             case "exp":
               result = `(${node.content})`;
               break;
+            case "toggle":
+              result = (node.content === 0) ? (leftConn ? evaluateNode(leftConn.output.id, leftConn.output.socket) : "0") : (rightConn ? evaluateNode(rightConn.output.id, rightConn.output.socket) : "0") 
+              break;
             case "switch":
               const activeConn = this.connections.find(
                 (conn) => conn.input.id === nodeId && conn.active

@@ -12,7 +12,7 @@
     :x="node.x"
     :y="node.y"
     :draggable="!isDrawingPath && !editable"
-    :resizable="node.type != 'time'"
+    :resizable="['time','theme'].includes(node.type)"
     :handles="['mr']"
     tabindex="1"
     @dblclick="editable = nodeType.editable"
@@ -33,7 +33,10 @@
   >
 
     
-    <TextNode v-if="['exp','empty','comment'].includes(node.type)" ref="textNodeRef":node="node" :editable="editable" @blur="handleBlur"/>
+    <TextNode v-if="['empty','exp','comment'].includes(node.type)" ref="textNodeRef":node="node" :editable="editable" @blur="handleBlur"/>
+    <!-- <ExpressionNode v-else-if="node.type === 'exp'" ref="textNodeRef":node="node" :editable="editable" @blur="handleBlur"/> -->
+    <ThemeNode v-else-if="node.type === 'theme'"/>
+
     <NumberNode v-else-if="node.type === 'number'" :node="node" :editable="editable" @blur="handleBlur"/>
     <PlayNode v-else-if="node.type === 'play'" />
     <StopNode v-else-if="node.type === 'stop'" />
@@ -46,14 +49,13 @@
     <TimeNode v-else-if="node.type === 'time'"/>
     <Visualizer v-else-if="node.type === 'visualizer'"/>
     <OperatorNode v-else-if="node.type == 'operator'" :node="node"/>
+    <ToggleNode v-else-if="node.type === 'toggle'" :node="node"/>
     <SwitchNode v-else-if="node.type === 'switch'" :node="node"/>
     <HelpNode v-else-if="node.type === 'help'"
       :nodeId="node.id"
       :content="node.content"
       :connectionActive="store.isConnectionActive(node.id, 0, 'input')"/>
     <div v-else-if="node.type == 'out'" class="content noselect">out</div>
-    
-
     <div v-else class="content noselect" style="color: cyan !important">{{ node.content }}</div>
 
     <div v-if="nodeType.inputs" class="inputs">
@@ -112,6 +114,8 @@ import VueDraggableResizable from "vue-draggable-resizable";
 import { NODE_TYPES } from "@/nodes/types";
 
 import TextNode from "./nodes/TextNode.vue";
+import ExpressionNode from "./nodes/ExpressionNode.vue";
+import ThemeNode from "./nodes/ThemeNode.vue";
 import NumberNode from "./nodes/NumberNode.vue";
 import PlayNode from "./nodes/PlayNode.vue";
 import ExportNode from "./nodes/ExportNode.vue";
@@ -119,6 +123,7 @@ import ExportImageNode from "./nodes/ExportImageNode.vue";
 import ImportNode from "./nodes/ImportNode.vue";
 import EvaluatedNode from "./nodes/EvaluatedNode.vue";
 import ErrorsNode from "./nodes/ErrorsNode.vue";
+import ToggleNode from "./nodes/ToggleNode.vue";
 import SwitchNode from "./nodes/SwitchNode.vue";
 import HelpNode from "./nodes/HelpNode.vue";
 import OperatorNode from "./nodes/OperatorNode.vue";
@@ -202,13 +207,10 @@ function handleDragging(left, top) {
 
   const deltaX = left - props.node.x;
   const deltaY = top - props.node.y;
-
- // Mueve el nodo principal
   store.updateNode(props.node.id, { x: left, y: top });
 
-  // Mueve los nodos seleccionados, manteniendo las posiciones relativas
   store.selectedNodes.forEach(nodeId => {
-    if (nodeId !== props.node.id) { // Evita volver a mover el nodo principal
+    if (nodeId !== props.node.id) {
       const node = store.find("nodes", "id", nodeId);
       const newLeft = node.x + deltaX;
       const newTop = node.y + deltaY;
@@ -242,7 +244,7 @@ function handleKeyDown(event) {
       'e': 15,
       'f': 16
     };
-    keyPressed = letterMap[event.key.toLowerCase()]; // Convertimos a minúscula para asegurar que capture 'A-F' también
+    keyPressed = letterMap[event.key.toLowerCase()];
   }
 
 
