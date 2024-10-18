@@ -5,7 +5,7 @@
   <input
     type="file"
     ref="fileInput"
-    accept=".b1t,.jpg"
+    accept=".json,.jpg"
     value=""
     @change="handleFileChange"
   />
@@ -30,7 +30,7 @@ function handleFileChange(event) {
 
   const fileExtension = file.name.split('.').pop().toLowerCase();
 
-  if (fileExtension === 'b1t') {
+  if (fileExtension === 'json') {
     handleB1TFile(file);
   } else if (fileExtension === 'jpg') {
     handleJPGFile(file);
