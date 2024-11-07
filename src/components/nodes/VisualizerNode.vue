@@ -1,6 +1,5 @@
-
 <template>
-  <canvas ref="canvas" :width="width" :height="height"></canvas>
+  <canvas ref="canvas" class="noselect" :width="width" :height="height"></canvas>
 </template>
 
 <script setup>
