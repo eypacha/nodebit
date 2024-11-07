@@ -30,7 +30,7 @@
           :step="30"
           aria-label="Hue rotation slider"
         />
-        <span>{{ store.theme.hueRotation }} deg</span>
+        <span>deg</span>
       </div>
     </div>
   </div>
@@ -58,7 +58,7 @@ h3 {
 
 .row {
   display: flex;
-  gap: 0.7rem;
+  gap: .4rem;
   align-items: center;
   margin-bottom: 5px;
 }
