@@ -4,6 +4,7 @@
     id="canvas"
     ref="canvas"
     :class="`mode-${mode}`"
+    @click.meta.prevent="addNodeMac"
     @click.ctrl.prevent="addNode"
     @click.exact="handleCanvasClick(false)"
     @click.shift="handleCanvasClick(true)"
@@ -50,6 +51,7 @@ const store = useStudioStore();
 const canvas = ref(null);
 const nodeRefs = ref([]);
 const allowedKeyEvent = ref(true);
+const isMac = ref(false);
 
 const {
   selectionBox,
@@ -62,6 +64,11 @@ const {
 
 const { mode, pathData, handleStartPath, handleFinishPath, handleCancelPath } =
   useRouting(mousePosition);
+
+async function addNodeMac(event){
+  if(!isMac.value) return
+  addNode(event)
+}
 
 async function addNode(event) {
   selectionBox.value = null;
@@ -92,10 +99,7 @@ function handleKeyUp(event) {
 
 async function handleKeyDown(event) {
 
-
   if(!allowedKeyEvent.value) return
-  
-
   const combo = getKeyCombo(event);
   const shortcut = keyboardShortcutsKeyDown[combo];
 
@@ -157,10 +161,14 @@ const keyboardShortcutsKeyDown = {
 
 function getKeyCombo(event) {
   const keys = [];
-  if (event.ctrlKey) keys.push('ctrl');
+
+  if (isMac.value && event.metaKey) {
+    keys.push('ctrl');
+  } else if (event.ctrlKey) {
+    keys.push('ctrl');
+  }
   if (event.shiftKey) keys.push('shift');
   if (event.altKey) keys.push('alt');
-  if (event.metaKey) keys.push('meta');
 
   keys.push(event.key.toLowerCase());
   return keys.join('+');
@@ -168,6 +176,7 @@ function getKeyCombo(event) {
 onMounted(() => {
   store.initializeHistory()
   store.evaluateBytebeat();
+  isMac.value = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
   document.addEventListener("keyup", handleKeyUp);
   document.addEventListener("keydown", handleKeyDown);
 });
