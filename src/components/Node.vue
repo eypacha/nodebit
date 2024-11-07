@@ -12,7 +12,7 @@
     :x="node.x"
     :y="node.y"
     :draggable="!isDrawingPath && !editable"
-    :resizable="['time','theme'].includes(node.type)"
+    :resizable="!['time','theme'].includes(node.type)"
     :handles="['mr']"
     tabindex="1"
     @dblclick="editable = nodeType.editable"
@@ -50,7 +50,9 @@
     <Visualizer v-else-if="node.type === 'visualizer'"/>
     <OperatorNode v-else-if="node.type == 'operator'" :node="node"/>
     <ToggleNode v-else-if="node.type === 'toggle'" :node="node"/>
+    <!-- <RangeNode v-else-if="node.type === 'range'" :node="node"/> -->
     <SwitchNode v-else-if="node.type === 'switch'" :node="node"/>
+    <!-- <MidiNode v-else-if="node.type === 'midi'" :node="node"/> -->
     <HelpNode v-else-if="node.type === 'help'"
       :nodeId="node.id"
       :content="node.content"
@@ -124,7 +126,9 @@ import ImportNode from "./nodes/ImportNode.vue";
 import EvaluatedNode from "./nodes/EvaluatedNode.vue";
 import ErrorsNode from "./nodes/ErrorsNode.vue";
 import ToggleNode from "./nodes/ToggleNode.vue";
+// import RangeNode from "./nodes/RangeNode.vue";
 import SwitchNode from "./nodes/SwitchNode.vue";
+// import MidiNode from "./nodes/MidiNode.vue";
 import HelpNode from "./nodes/HelpNode.vue";
 import OperatorNode from "./nodes/OperatorNode.vue";
 import StopNode from "./nodes/StopNode.vue";
@@ -220,7 +224,12 @@ function handleDragging(left, top) {
 }
 
 function handleResizing(left, top, width, height) {
-  store.updateNode(props.node.id, {w: width})
+
+  if (isNaN(width)) {
+    console.error("Width is NaN");
+    return; 
+  }
+  store.updateNode(props.node.id, { w: width });
 }
 
 function handleNodeClick(){
