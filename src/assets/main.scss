@@ -1,4 +1,4 @@
-@import './base.css';
+@import './base.scss';
 
 #app {
   margin: 0;
@@ -12,4 +12,12 @@
   main {
     height: 100%;
   }
+}
+
+.shadow {
+  box-shadow: black 0px 2px 2px;
+}
+
+.shadow-inset {
+  box-shadow: black 0px 2px 2px;
 }
