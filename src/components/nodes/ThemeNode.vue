@@ -51,15 +51,4 @@ const store = useStudioStore();
   padding: 10px;
   font-size: 12px;
 }
-h3 {
-  color: cyan;
-  margin-bottom: 15px;
-}
-
-.row {
-  display: flex;
-  gap: .4rem;
-  align-items: center;
-  margin-bottom: 5px;
-}
 </style>
