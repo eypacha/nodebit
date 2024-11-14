@@ -74,7 +74,7 @@ async function addNode(event) {
   selectionBox.value = null;
   const { offsetX, offsetY } = event;
   const newNodeId = await store.addNode(offsetX - 30, offsetY, 20);
-  console.log('new Node created',newNodeId)
+  console.log('🆕 new Node created',newNodeId)
   await nextTick();
   store.selectNode(newNodeId);
   await nextTick();
