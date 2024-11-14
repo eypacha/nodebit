@@ -47,11 +47,12 @@
     <EvaluatedNode v-else-if="node.type === 'evaluated'"/>
     <ErrorsNode v-else-if="node.type === 'errors'"/>
     <TimeNode v-else-if="node.type === 'time'"/>
-    <Visualizer v-else-if="node.type === 'visualizer'"/>
+    <VisualizerNode v-else-if="node.type === 'visualizer'"/>
     <OperatorNode v-else-if="node.type == 'operator'" :node="node"/>
     <ToggleNode v-else-if="node.type === 'toggle'" :node="node"/>
-    <!-- <RangeNode v-else-if="node.type === 'range'" :node="node"/> -->
+    <RangeNode v-else-if="node.type === 'range'" :node="node"/>
     <SwitchNode v-else-if="node.type === 'switch'" :node="node"/>
+    <SettingsNode v-else-if="node.type === 'settings'" :node="node"/>
     <!-- <MidiNode v-else-if="node.type === 'midi'" :node="node"/> -->
     <HelpNode v-else-if="node.type === 'help'"
       :nodeId="node.id"
@@ -126,7 +127,7 @@ import ImportNode from "./nodes/ImportNode.vue";
 import EvaluatedNode from "./nodes/EvaluatedNode.vue";
 import ErrorsNode from "./nodes/ErrorsNode.vue";
 import ToggleNode from "./nodes/ToggleNode.vue";
-// import RangeNode from "./nodes/RangeNode.vue";
+import RangeNode from "./nodes/RangeNode.vue";
 import SwitchNode from "./nodes/SwitchNode.vue";
 // import MidiNode from "./nodes/MidiNode.vue";
 import HelpNode from "./nodes/HelpNode.vue";
@@ -134,7 +135,8 @@ import OperatorNode from "./nodes/OperatorNode.vue";
 import StopNode from "./nodes/StopNode.vue";
 import ResetNode from "./nodes/ResetNode.vue";
 import TimeNode from "./nodes/TimeNode.vue";
-import Visualizer from './nodes/VisualizerNode.vue';
+import VisualizerNode from './nodes/VisualizerNode.vue';
+import SettingsNode from './nodes/SettingsNode.vue';
 
 
 import { useStudioStore } from "@/stores/studio";
@@ -267,15 +269,13 @@ function handleKeyDown(event) {
     case 'operator':
       //
       break;
-
   }
-
  
 }
 function handleNodeKeyUp(event) {
   if (event.key == "Delete" || event.key == "Backspace") {
     if (editable.value) return;
-    console.log('handlekeydown en nodo')
+    console.log('⌨️ handlekeydown en nodo')
     store.deleteNode(props.node.id);
     store.evaluateBytebeat()
   }
