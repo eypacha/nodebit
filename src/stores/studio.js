@@ -15,6 +15,7 @@ export const useStudioStore = defineStore("studio", {
     connections,
     mode: "default",
     isPlaying: false,
+    sampleRate: 8000,
     expressions: ["", ""],
     error: null,
     nodeTypes: NODE_TYPES,
@@ -146,6 +147,13 @@ export const useStudioStore = defineStore("studio", {
     
       requestAnimationFrame(updateTime)
       this.visualizationInterval = setInterval(updateVisualization, 128);
+    },
+    setSampleRate(sampleTime = 8000) {
+      this.sampleRate = sampleTime
+      audioEngine.setSampleRate(sampleTime)
+    },
+    getSampleRate(){
+      return audioEngine.getDesiredSampleRate();
     },
     async playPause() {
       if (!this.isPlaying) {
@@ -365,15 +373,13 @@ export const useStudioStore = defineStore("studio", {
         ...updatedProps,
       };
 
-      console.log('updateNode',nodeId, updatedProps)
+      console.log('📝 updateNode',nodeId, updatedProps)
 
       this.nodes.splice(index, 1, updatedNode);
 
     
       if (updatedProps.type) {
-
         this.checkInvalidConnections(index);
-        
       }
 
       if (
@@ -422,7 +428,7 @@ export const useStudioStore = defineStore("studio", {
       return maxSocket;
     },
     async evaluateBytebeat() {
-      console.trace('🧮 Evaluating')
+      console.log('🧮 Evaluating')
       try {
         const outputNode = this.find("nodes", "type", "out");
 
@@ -466,6 +472,23 @@ export const useStudioStore = defineStore("studio", {
             case "toggle":
               result = (node.content === 0) ? (leftConn ? evaluateNode(leftConn.output.id, leftConn.output.socket) : "0") : (rightConn ? evaluateNode(rightConn.output.id, rightConn.output.socket) : "0") 
               break;
+            // case "range":
+    
+            //   console.log('range =>',node.content)
+
+            //   let nodeLeft = leftConn ? this.find("nodes", "id", leftConn.output.id) : null
+            //   let nodeRight = nodeRight ? this.find("nodes", "id", rightConn.output.id) : null
+         
+
+            //   let typeLeft = nodeLeft ? nodeLeft.type : null;
+            //   let typeRight = nodeRight ? nodeRight.type : null
+
+            //   if(typeLeft === 'number' && typeRight === 'number') {
+            //     console.log('numbers =>',nodeLeft.content,nodeRight.content)
+            //   }
+
+            //   result = `${node.content}`
+            //   break;
             case "switch":
               const activeConn = this.connections.find(
                 (conn) => conn.input.id === nodeId && conn.active

@@ -389,12 +389,43 @@ const NODE_TYPES = {
 
     toggle: {
       name: 'Toggle',
-      description: 'Toggle between two connections.',
+      description: 'Toggle between two connections. No connection evaluates as 0',
       inputs: 2,
       outputs: 1,
       editable: false,
       pattern: (content) => content === 'toggle',
     },
+
+    // midi: {
+    //   name: 'Midi',
+    //   description: 'Midi',
+    //   inputs: 0,
+    //   outputs: 2,
+    //   editable: false,
+    //   pattern: (content) => content === 'midi',
+    // },
+
+    settings: {
+      name: 'Audio settings',
+      description: 'Audio settings',
+      inputs: 0,
+      outputs: 0,
+      editable: false,
+      minWidth: 230,
+      minHeight: 190,
+      pattern: (content) => content === 'settings',
+    },
+
+    range: {
+    //   name: 'Range',
+    //   description: 'Interpolates between both connections. Defaults to range of 0 and 1 if no connections are provided',
+    //   inputs: 2,
+    //   outputs: 1,
+    //   minWidth: 160,
+    //   minHeight: 64,
+    //   editable: false,
+    //   pattern: (content) => content === 'range',
+    // },
 
     switch: {
       name: 'Switch',
