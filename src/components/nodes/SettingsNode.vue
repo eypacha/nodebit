@@ -8,7 +8,7 @@
       <div class="row">
         <Select
           ariaLabel="Select a sample rate"
-          :sampleRates="sampleRatesList"
+          :options="sampleRatesList"
           :selectedValue="selectedSampleRate"
           @update:selected="updateSampleRate"
         />
