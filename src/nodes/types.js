@@ -416,7 +416,7 @@ const NODE_TYPES = {
       pattern: (content) => content === 'settings',
     },
 
-    range: {
+    // range: {
     //   name: 'Range',
     //   description: 'Interpolates between both connections. Defaults to range of 0 and 1 if no connections are provided',
     //   inputs: 2,
