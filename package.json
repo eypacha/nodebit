@@ -12,6 +12,7 @@
   "dependencies": {
     "@vueuse/core": "^11.1.0",
     "html2canvas": "^1.4.1",
+    "peerjs": "^1.5.4",
     "piexifjs": "^1.0.6",
     "pinia": "^2.2.4",
     "vue": "^3.4.29",

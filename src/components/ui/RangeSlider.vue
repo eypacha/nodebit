@@ -6,24 +6,31 @@
       :max="max"
       :step="step"
       :value="modelValue"
-      @input="$emit('update:modelValue', $event.target.value)"
+      :style="{ width: width ? `${width}px` : '139px' }"
+      @mousedown.stop="isSliding = true"
+      @touchstart.stop="isSliding = true"
+      @mouseup.stop="isSliding = false"
+      @touchend.stop="isSliding = false"
+      @input="$emit('update:modelValue', +$event.target.value)"
       :aria-label="ariaLabel"
-      @mousedown.stop
-      @touchstart.stop
     />
+    <span :class="{isSliding}">{{ modelValue }}</span>
   </label>
 </template>
 
 <script setup>
-import { defineProps, defineEmits } from "vue";
+import { defineProps, ref, defineEmits } from "vue";
 
 const props = defineProps({
   modelValue: Number,
   min: Number,
   max: Number,
   step: Number,
+  width: Number,
   ariaLabel: String,
 });
+
+const isSliding = ref(false);
 
 defineEmits(["update:modelValue"]);
 </script>
@@ -51,6 +58,21 @@ label {
 
     &[disabled]::-webkit-slider-thumb {
       opacity: 0.5;
+    }
+  }
+
+    span {
+    opacity: 0;
+    font-size: 15px;
+    pointer-events: none;
+    right: 7px;
+    color: yellow;
+    mix-blend-mode: exclusion;
+    position: absolute;
+    transition: opacity 100ms;
+
+    &.isSliding {
+      opacity: 1;
     }
   }
 }

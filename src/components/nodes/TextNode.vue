@@ -108,6 +108,10 @@ function updateNode() {
     content = 0
   }
 
+  if(type === 'range') {
+    content = 0
+  }
+
   store.updateNode(props.node.id, { content, type, w, h });
 }
 </script>
