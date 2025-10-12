@@ -416,16 +416,16 @@ const NODE_TYPES = {
       pattern: (content) => content === 'settings',
     },
 
-    // range: {
-    //   name: 'Range',
-    //   description: 'Interpolates between both connections. Defaults to range of 0 and 1 if no connections are provided',
-    //   inputs: 2,
-    //   outputs: 1,
-    //   minWidth: 160,
-    //   minHeight: 64,
-    //   editable: false,
-    //   pattern: (content) => content === 'range',
-    // },
+    range: {
+      name: 'Range',
+      description: 'Interpolates between both connections. Defaults to range of 0 and 1 if no connections are provided',
+      inputs: 2,
+      outputs: 1,
+      minWidth: 160,
+      minHeight: 64,
+      editable: false,
+      pattern: (content) => content === 'range',
+    },
 
     switch: {
       name: 'Switch',

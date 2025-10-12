@@ -462,33 +462,26 @@ export const useStudioStore = defineStore("studio", {
           );
 
           let result = "";
-          switch (node.type) {
-            case "number":
-              result = node.content;
-              break;
-            case "exp":
-              result = `(${node.content})`;
-              break;
-            case "toggle":
-              result = (node.content === 0) ? (leftConn ? evaluateNode(leftConn.output.id, leftConn.output.socket) : "0") : (rightConn ? evaluateNode(rightConn.output.id, rightConn.output.socket) : "0") 
-              break;
-            // case "range":
-    
-            //   console.log('range =>',node.content)
-
-            //   let nodeLeft = leftConn ? this.find("nodes", "id", leftConn.output.id) : null
-            //   let nodeRight = nodeRight ? this.find("nodes", "id", rightConn.output.id) : null
-         
-
-            //   let typeLeft = nodeLeft ? nodeLeft.type : null;
-            //   let typeRight = nodeRight ? nodeRight.type : null
-
-            //   if(typeLeft === 'number' && typeRight === 'number') {
-            //     console.log('numbers =>',nodeLeft.content,nodeRight.content)
-            //   }
-
-            //   result = `${node.content}`
-            //   break;
+            switch (node.type) {
+              case "number":
+                result = node.content;
+                break;
+              case "exp":
+                result = `(${node.content})`;
+                break;
+              case "toggle":
+                result = (node.content === 0) ? (leftConn ? evaluateNode(leftConn.output.id, leftConn.output.socket) : "0") : (rightConn ? evaluateNode(rightConn.output.id, rightConn.output.socket) : "0") 
+                break;
+              case "range":
+                // Interpolación entre los valores de los nodos conectados
+                // Si no hay conexiones, usa 0 y 1 como valores por defecto
+                const leftValue = leftConn ? parseFloat(evaluateNode(leftConn.output.id, leftConn.output.socket)) : 0;
+                const rightValue = rightConn ? parseFloat(evaluateNode(rightConn.output.id, rightConn.output.socket)) : 1;
+                // El valor del slider está en node.content (debe estar entre 0 y 1)
+                const slider = typeof node.content === 'number' ? node.content : parseFloat(node.content);
+                // Interpolación lineal
+                result = `(${leftValue} + (${rightValue} - ${leftValue}) * ${slider})`;
+                break;
             case "switch":
               const activeConn = this.connections.find(
                 (conn) => conn.input.id === nodeId && conn.active
@@ -511,7 +504,7 @@ export const useStudioStore = defineStore("studio", {
                   : "0"
               })`;
               break;
-            case "negation": // Nuevo caso para negación
+            case "negation":
               result = `!${
                 leftConn
                   ? evaluateNode(leftConn.output.id, leftConn.output.socket)
