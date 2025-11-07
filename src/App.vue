@@ -3,7 +3,7 @@
     <header class="noselect">
       <nav>
         <img src="/public/favicon-32x32.png" alt="Nodebit" />  
-        <h4>nodebit 0.001</h4>
+        <h4>nodebit 0.8</h4>
       </nav>
     </header>
 
