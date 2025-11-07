@@ -18,7 +18,7 @@ export const CONTEXT_MENU_OPTIONS = [
       },
       {
         id: 'node-time',
-        label: 'Time (t)',
+        label: 'Time',
         nodeType: 'time',
         content: 't'
       },
