@@ -35,10 +35,34 @@
           v-for="subOption in activeSubmenu"
           :key="subOption.id"
           @click="handleSubOptionClick(subOption)"
+          @mouseenter="handleSubOptionMouseEnter(subOption, $event)"
+          @mouseleave="handleSubOptionMouseLeave"
+          :class="{ 'has-submenu': subOption.submenu }"
         >
           {{ subOption.label }}
+          <span v-if="subOption.submenu" class="arrow">▶</span>
         </li>
       </ul>
+      
+      <!-- Sub-submenu (tercer nivel) -->
+      <div
+        v-if="showSubSubmenu && activeSubSubmenu"
+        class="context-menu submenu sub-submenu"
+        :style="{ left: subSubmenuPosition.x + 'px', top: subSubmenuPosition.y + 'px' }"
+        @click.stop
+        @mouseenter="handleSubSubmenuEnter"
+        @mouseleave="handleSubSubmenuLeave"
+      >
+        <ul>
+          <li
+            v-for="subSubOption in activeSubSubmenu"
+            :key="subSubOption.id"
+            @click="handleSubSubOptionClick(subSubOption)"
+          >
+            {{ subSubOption.label }}
+          </li>
+        </ul>
+      </div>
     </div>
   </div>
 </template>
@@ -62,7 +86,13 @@ const emit = defineEmits(['option-selected', 'close']);
 const showSubmenu = ref(false);
 const activeSubmenu = ref(null);
 const submenuPosition = ref({ x: 0, y: 0 });
+
+const showSubSubmenu = ref(false);
+const activeSubSubmenu = ref(null);
+const subSubmenuPosition = ref({ x: 0, y: 0 });
+
 let hideSubmenuTimeout = null;
+let hideSubSubmenuTimeout = null;
 
 function handleOptionClick(option) {
   // No hacer nada si está deshabilitada
@@ -79,8 +109,60 @@ function handleOptionClick(option) {
 }
 
 function handleSubOptionClick(subOption) {
+  if (subOption.submenu) {
+    // No hacer nada si tiene submenu, se maneja con mouseenter
+    return;
+  }
   emit('option-selected', subOption);
   emit('close');
+}
+
+function handleSubSubOptionClick(subSubOption) {
+  emit('option-selected', subSubOption);
+  emit('close');
+}
+
+function handleSubOptionMouseEnter(subOption, event) {
+  // Cancelar cualquier timeout pendiente del sub-submenu
+  if (hideSubSubmenuTimeout) {
+    clearTimeout(hideSubSubmenuTimeout);
+    hideSubSubmenuTimeout = null;
+  }
+  
+  if (subOption.submenu) {
+    const rect = event.target.getBoundingClientRect();
+    subSubmenuPosition.value = {
+      x: rect.width - 2,
+      y: 0
+    };
+    activeSubSubmenu.value = subOption.submenu;
+    showSubSubmenu.value = true;
+  } else {
+    // Si no tiene submenu, ocultar cualquier sub-submenu activo
+    showSubSubmenu.value = false;
+    activeSubSubmenu.value = null;
+  }
+}
+
+function handleSubOptionMouseLeave() {
+  if (!hideSubSubmenuTimeout) {
+    hideSubSubmenuTimeout = setTimeout(() => {
+      showSubSubmenu.value = false;
+      activeSubSubmenu.value = null;
+      hideSubSubmenuTimeout = null;
+    }, 150);
+  }
+}
+
+function handleSubSubmenuEnter() {
+  if (hideSubSubmenuTimeout) {
+    clearTimeout(hideSubSubmenuTimeout);
+    hideSubSubmenuTimeout = null;
+  }
+}
+
+function handleSubSubmenuLeave() {
+  handleSubOptionMouseLeave();
 }
 
 function handleMouseEnter(option, event) {
@@ -139,6 +221,10 @@ function handleSubmenuLeave() {
 
 .submenu {
   z-index: 1001;
+}
+
+.sub-submenu {
+  z-index: 1002;
 }
 
 ul {

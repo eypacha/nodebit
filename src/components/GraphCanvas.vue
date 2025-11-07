@@ -96,6 +96,42 @@ const contextMenuOptions = computed(() => {
           content: 't'
         },
         {
+          id: 'node-operators',
+          label: 'Operadores',
+          submenu: [
+            {
+              id: 'node-operator-add',
+              label: 'Suma',
+              nodeType: 'operator',
+              content: '+'
+            },
+            {
+              id: 'node-operator-subtract',
+              label: 'Resta',
+              nodeType: 'operator',
+              content: '-'
+            },
+            {
+              id: 'node-operator-multiply',
+              label: 'Multiplicación',
+              nodeType: 'operator',
+              content: '*'
+            },
+            {
+              id: 'node-operator-divide',
+              label: 'División',
+              nodeType: 'operator',
+              content: '/'
+            },
+            {
+              id: 'node-operator-modulo',
+              label: 'Módulo',
+              nodeType: 'operator',
+              content: '%'
+            }
+          ]
+        },
+        {
           id: 'node-help',
           label: 'Help',
           nodeType: 'help',
@@ -126,6 +162,7 @@ function getDefaultContent(nodeType) {
     case 'empty': return '';
     case 'number': return '0';
     case 'time': return 't';
+    case 'operator': return '+';
     case 'help': return 'help';
     default: return '';
   }
