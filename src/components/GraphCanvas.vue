@@ -72,12 +72,25 @@ const contextMenuOptions = computed(() => {
     { 
       id: 1, 
       label: 'Nuevo', 
+      shortcut: 'Ctrl+Click',
       submenu: [
         {
           id: 'node-empty',
           label: 'Empty',
           nodeType: 'empty',
           content: ''
+        },
+        {
+          id: 'node-number',
+          label: 'Number',
+          nodeType: 'number',
+          content: '0'
+        },
+        {
+          id: 'node-time',
+          label: 'Time (t)',
+          nodeType: 'time',
+          content: 't'
         },
         {
           id: 'node-help',
@@ -94,6 +107,8 @@ const contextMenuOptions = computed(() => {
 function getDefaultContent(nodeType) {
   switch(nodeType) {
     case 'empty': return '';
+    case 'number': return '0';
+    case 'time': return 't';
     case 'help': return 'help';
     default: return '';
   }
@@ -161,8 +176,8 @@ async function handleContextMenuOption(option) {
     await nextTick();
     store.selectNode(newNodeId);
     
-    // Si es un nodo empty, activar modo editable
-    if (option.nodeType === 'empty') {
+    // Si es un nodo editable (empty, number), activar modo editable
+    if (option.nodeType === 'empty' || option.nodeType === 'number') {
       await nextTick();
       nodeRefs.value[newNodeId]?.focusAndEdit();
     }

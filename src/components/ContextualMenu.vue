@@ -13,7 +13,8 @@
         @mouseleave="handleMouseLeave"
         :class="{ 'has-submenu': option.submenu }"
       >
-        {{ option.label }}
+        <span class="menu-label">{{ option.label }}</span>
+        <span v-if="option.shortcut" class="shortcut">{{ option.shortcut }}</span>
         <span v-if="option.submenu" class="arrow">▶</span>
       </li>
     </ul>
@@ -147,6 +148,17 @@ li {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 8px;
+}
+
+.menu-label {
+  flex: 1;
+}
+
+.shortcut {
+  font-size: 11px;
+  color: var(--color-text-muted, #888);
+  opacity: 0.7;
 }
 
 li:last-child {
