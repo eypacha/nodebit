@@ -97,7 +97,7 @@ const contextMenuOptions = computed(() => {
         },
         {
           id: 'node-operators',
-          label: 'Operadores',
+          label: 'Operadores aritméticos',
           submenu: [
             {
               id: 'node-operator-add',

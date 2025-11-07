@@ -138,7 +138,6 @@ function handleSubOptionMouseEnter(subOption, event) {
     activeSubSubmenu.value = subOption.submenu;
     showSubSubmenu.value = true;
   } else {
-    // Si no tiene submenu, ocultar cualquier sub-submenu activo
     showSubSubmenu.value = false;
     activeSubSubmenu.value = null;
   }
@@ -216,15 +215,12 @@ function handleSubmenuLeave() {
   box-shadow: black 0px 2px 8px;
   z-index: 1000;
   min-width: 150px;
+  width: max-content;
   color: var(--color-t);
 }
 
 .submenu {
   z-index: 1001;
-}
-
-.sub-submenu {
-  z-index: 1002;
 }
 
 ul {
@@ -243,6 +239,7 @@ li {
   justify-content: space-between;
   align-items: center;
   gap: 8px;
+  white-space: nowrap;
 }
 
 .menu-label {
