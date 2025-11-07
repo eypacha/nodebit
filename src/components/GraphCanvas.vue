@@ -11,6 +11,7 @@
     @mousedown="startMouseSelection"
     @mousemove="trackMousePosition($event)"
     @mouseleave="selectionBox = null"
+    @contextmenu.prevent="showContextMenuAt($event)"
   >
     <ConnectionsLayer />
     <Node
@@ -34,17 +35,26 @@
         height: `${selectionBox.height}px`,
       }"
     />
+    <ContextualMenu
+      v-if="showContextMenu"
+      :position="contextMenuPosition"
+      :options="contextMenuOptions"
+      @option-selected="handleContextMenuOption"
+      @close="closeContextMenu"
+    />
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted, nextTick } from "vue";
+import { ref, onMounted, onUnmounted, nextTick, computed } from "vue";
 import { useStudioStore } from "@/stores/studio";
 import { useSelection } from "@/composables/useSelection";
 import { useRouting } from "@/composables/useRouting";
+import { NODE_TYPES } from "@/nodes/types";
 import Node from "./Node.vue";
 import ConnectionsLayer from "./ConnectionsLayer.vue";
 import ConnectingRoute from "./ConnectingRoute.vue";
+import ContextualMenu from "./ContextualMenu.vue";
 import "./GraphCanvas.scss";
 
 const store = useStudioStore();
@@ -53,14 +63,56 @@ const nodeRefs = ref([]);
 const allowedKeyEvent = ref(true);
 const isMac = ref(false);
 
+const showContextMenu = ref(false);
+const contextMenuPosition = ref({ x: 0, y: 0 });
+
+// Generar opciones del menú dinámicamente basado en los tipos de nodos
+const contextMenuOptions = computed(() => {
+  return [
+    { 
+      id: 1, 
+      label: 'Nuevo', 
+      submenu: [
+        {
+          id: 'node-empty',
+          label: 'Empty',
+          nodeType: 'empty',
+          content: ''
+        },
+        {
+          id: 'node-help',
+          label: 'Help',
+          nodeType: 'help',
+          content: 'help'
+        }
+      ]
+    },
+  ];
+});
+
+// Función para obtener el contenido por defecto de cada tipo de nodo
+function getDefaultContent(nodeType) {
+  switch(nodeType) {
+    case 'empty': return '';
+    case 'help': return 'help';
+    default: return '';
+  }
+}
+
 const {
   selectionBox,
   selectionBoxVisibility,
   startMouseSelection,
   trackMousePosition,
-  handleCanvasClick,
+  handleCanvasClick: originalHandleCanvasClick,
   mousePosition,
 } = useSelection(canvas);
+
+// Wrapper para handleCanvasClick que también cierra el menú contextual
+function handleCanvasClick(shiftKey) {
+  closeContextMenu();
+  originalHandleCanvasClick(shiftKey);
+}
 
 const { mode, pathData, handleStartPath, handleFinishPath, handleCancelPath } =
   useRouting(mousePosition);
@@ -79,6 +131,64 @@ async function addNode(event) {
   store.selectNode(newNodeId);
   await nextTick();
   nodeRefs.value[newNodeId].focusAndEdit();
+}
+
+function showContextMenuAt(event) {
+  contextMenuPosition.value = { x: event.clientX, y: event.clientY - 41 };
+  showContextMenu.value = true;
+}
+
+function closeContextMenu() {
+  showContextMenu.value = false;
+}
+
+async function handleContextMenuOption(option) {
+  console.log('Selected option:', option);
+  
+  // Si es una opción de crear nodo
+  if (option.nodeType && option.content !== undefined) {
+    const rect = canvas.value.getBoundingClientRect();
+    const canvasX = contextMenuPosition.value.x - rect.left + canvas.value.scrollLeft;
+    const canvasY = contextMenuPosition.value.y - rect.top + canvas.value.scrollTop;
+    
+    const newNodeId = await store.addNodeWithType(
+      canvasX - 30, 
+      canvasY + 41, 
+      option.nodeType, 
+      option.content
+    );
+    
+    await nextTick();
+    store.selectNode(newNodeId);
+    
+    // Si es un nodo empty, activar modo editable
+    if (option.nodeType === 'empty') {
+      await nextTick();
+      nodeRefs.value[newNodeId]?.focusAndEdit();
+    }
+    
+    store.evaluateBytebeat();
+    store.saveState();
+  }
+}
+
+function handleDocumentClick(event) {
+  // Verificar si el click fue dentro del menú contextual o submenu
+  const contextMenuElement = document.querySelector('.context-menu');
+  if (contextMenuElement && contextMenuElement.contains(event.target)) {
+    return; // No cerrar si el click fue dentro del menú
+  }
+  
+  // Verificar submenus también
+  const submenuElements = document.querySelectorAll('.context-menu.submenu');
+  for (let submenu of submenuElements) {
+    if (submenu.contains(event.target)) {
+      return; // No cerrar si el click fue dentro de un submenu
+    }
+  }
+  
+  // Cerrar el menú si el click fue fuera
+  closeContextMenu();
 }
 
 function handleKeyUp(event) {
@@ -179,11 +289,13 @@ onMounted(() => {
   isMac.value = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
   document.addEventListener("keyup", handleKeyUp);
   document.addEventListener("keydown", handleKeyDown);
+  document.addEventListener("click", handleDocumentClick);
 });
 
 onUnmounted(() => {
   document.removeEventListener("keydown", handleKeyDown);
   document.removeEventListener("keyup", handleKeyUp);
+  document.removeEventListener("click", handleDocumentClick);
   if (store.byteBeatNode) {
     store.context = null;
     store.byteBeatNode.disconnect();

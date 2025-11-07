@@ -25,6 +25,8 @@ import GraphCanvas from "./components/GraphCanvas.vue";
 .content {
   height: 100%;
   background-color: #17111f;
+  display: flex;
+  flex-direction: column;
 }
 header {
   padding: .5rem;
@@ -41,5 +43,9 @@ header {
       height: 20px;
     }
   }
+}
+
+main {
+  position: relative;
 }
 </style>

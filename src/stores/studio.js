@@ -207,6 +207,25 @@ export const useStudioStore = defineStore("studio", {
 
       return newNode.id;
     },
+    addNodeWithType(x, y, nodeType, content) {
+      const newNode = {
+        id: generateUniqueId(),
+        type: nodeType,
+        content: content || "",
+        w: 65,
+        h: 44,
+        x: x,
+        y: y,
+      };
+
+      this.nodes.push(newNode);
+
+      console.log('🆕 new Node created with type:', nodeType, newNode.id);
+
+      this.deselectAll();
+
+      return newNode.id;
+    },
     deleteNode(nodeId) {
       this.deselectAll();
       this.nodes = this.nodes.filter((node) => node.id !== nodeId);
