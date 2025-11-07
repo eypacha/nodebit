@@ -208,12 +208,14 @@ export const useStudioStore = defineStore("studio", {
       return newNode.id;
     },
     addNodeWithType(x, y, nodeType, content) {
+      const nodeTypeConfig = NODE_TYPES[nodeType] || {};
+      
       const newNode = {
         id: generateUniqueId(),
         type: nodeType,
         content: content || "",
-        w: 65,
-        h: 44,
+        w: nodeTypeConfig.minWidth || 65,
+        h: nodeTypeConfig.minHeight || 44,
         x: x,
         y: y,
       };
