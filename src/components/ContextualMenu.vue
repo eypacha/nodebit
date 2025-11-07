@@ -11,7 +11,10 @@
         @click="handleOptionClick(option)"
         @mouseenter="handleMouseEnter(option, $event)"
         @mouseleave="handleMouseLeave"
-        :class="{ 'has-submenu': option.submenu }"
+        :class="{ 
+          'has-submenu': option.submenu,
+          'disabled': option.disabled === true
+        }"
       >
         <span class="menu-label">{{ option.label }}</span>
         <span v-if="option.shortcut" class="shortcut">{{ option.shortcut }}</span>
@@ -62,6 +65,11 @@ const submenuPosition = ref({ x: 0, y: 0 });
 let hideSubmenuTimeout = null;
 
 function handleOptionClick(option) {
+  // No hacer nada si está deshabilitada
+  if (option.disabled === true) {
+    return;
+  }
+  
   if (option.submenu) {
     // No hacer nada si tiene submenu, se maneja con mouseenter
     return;
@@ -167,6 +175,15 @@ li:last-child {
 
 li:hover {
   background: var(--color-background-soft);
+}
+
+li.disabled {
+  opacity: 0.2;
+  cursor: not-allowed;
+}
+
+li.disabled:hover {
+  background: transparent;
 }
 
 .has-submenu {

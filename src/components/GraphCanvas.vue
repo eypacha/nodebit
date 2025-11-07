@@ -68,6 +68,8 @@ const contextMenuPosition = ref({ x: 0, y: 0 });
 
 // Generar opciones del menú dinámicamente basado en los tipos de nodos
 const contextMenuOptions = computed(() => {
+  const hasSelection = store.selectedNodes.length > 0 || store.selectedConnections.length > 0;
+  
   return [
     { 
       id: 1, 
@@ -100,6 +102,19 @@ const contextMenuOptions = computed(() => {
         }
       ]
     },
+    {
+      id: 2,
+      label: 'Copiar',
+      shortcut: 'Ctrl+C',
+      action: 'copy',
+      disabled: !hasSelection
+    },
+    {
+      id: 3,
+      label: 'Pegar',
+      shortcut: 'Ctrl+V',
+      action: 'paste'
+    }
   ];
 });
 
@@ -159,6 +174,26 @@ function closeContextMenu() {
 
 async function handleContextMenuOption(option) {
   console.log('Selected option:', option);
+  
+  // Manejar acciones específicas
+  if (option.action) {
+    switch (option.action) {
+      case 'copy':
+        store.copySelection();
+        console.log('📋 Copied selection');
+        break;
+      case 'paste':
+        const rect = canvas.value.getBoundingClientRect();
+        const canvasX = contextMenuPosition.value.x - rect.left + canvas.value.scrollLeft;
+        const canvasY = contextMenuPosition.value.y - rect.top + canvas.value.scrollTop;
+        await store.pasteSelection({ x: canvasX, y: canvasY });
+        store.evaluateBytebeat();
+        store.saveState();
+        console.log('📋 Pasted selection');
+        break;
+    }
+    return;
+  }
   
   // Si es una opción de crear nodo
   if (option.nodeType && option.content !== undefined) {
