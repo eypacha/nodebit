@@ -32,7 +32,7 @@
     >
       <ul>
         <li
-          v-for="subOption in activeSubmenu"
+          v-for="(subOption, index) in activeSubmenu"
           :key="subOption.id"
           @click="handleSubOptionClick(subOption)"
           @mouseenter="handleSubOptionMouseEnter(subOption, $event)"
@@ -55,13 +55,37 @@
       >
         <ul>
           <li
-            v-for="subSubOption in activeSubSubmenu"
+            v-for="(subSubOption, subIndex) in activeSubSubmenu"
             :key="subSubOption.id"
             @click="handleSubSubOptionClick(subSubOption)"
+            @mouseenter="handleSubSubOptionMouseEnter(subSubOption, $event)"
+            @mouseleave="handleSubSubOptionMouseLeave"
+            :class="{ 'has-submenu': subSubOption.submenu }"
           >
             {{ subSubOption.label }}
+            <span v-if="subSubOption.submenu" class="arrow">▶</span>
           </li>
         </ul>
+        
+        <!-- Sub-sub-submenu (cuarto nivel) -->
+        <div
+          v-if="showSubSubSubmenu && activeSubSubSubmenu"
+          class="context-menu submenu sub-sub-submenu"
+          :style="{ left: subSubSubmenuPosition.x + 'px', top: subSubSubmenuPosition.y + 'px' }"
+          @click.stop
+          @mouseenter="handleSubSubSubmenuEnter"
+          @mouseleave="handleSubSubSubmenuLeave"
+        >
+          <ul>
+            <li
+              v-for="subSubSubOption in activeSubSubSubmenu"
+              :key="subSubSubOption.id"
+              @click="handleSubSubSubOptionClick(subSubSubOption)"
+            >
+              {{ subSubSubOption.label }}
+            </li>
+          </ul>
+        </div>
       </div>
     </div>
   </div>
@@ -91,8 +115,13 @@ const showSubSubmenu = ref(false);
 const activeSubSubmenu = ref(null);
 const subSubmenuPosition = ref({ x: 0, y: 0 });
 
+const showSubSubSubmenu = ref(false);
+const activeSubSubSubmenu = ref(null);
+const subSubSubmenuPosition = ref({ x: 0, y: 0 });
+
 let hideSubmenuTimeout = null;
 let hideSubSubmenuTimeout = null;
+let hideSubSubSubmenuTimeout = null;
 
 function handleOptionClick(option) {
   // No hacer nada si está deshabilitada
@@ -118,7 +147,62 @@ function handleSubOptionClick(subOption) {
 }
 
 function handleSubSubOptionClick(subSubOption) {
+  if (subSubOption.submenu) {
+    // No hacer nada si tiene submenu, se maneja con mouseenter
+    return;
+  }
   emit('option-selected', subSubOption);
+  emit('close');
+}
+
+function handleSubSubOptionMouseEnter(subSubOption, event) {
+  // Cancelar cualquier timeout pendiente del sub-sub-submenu
+  if (hideSubSubSubmenuTimeout) {
+    clearTimeout(hideSubSubSubmenuTimeout);
+    hideSubSubSubmenuTimeout = null;
+  }
+  
+  if (subSubOption.submenu) {
+    const rect = event.target.getBoundingClientRect();
+    const subSubmenuRect = event.target.closest('.sub-submenu').getBoundingClientRect();
+    
+    subSubSubmenuPosition.value = {
+      x: subSubmenuRect.width, // Posición relativa al ancho total del sub-submenu padre
+      y: rect.top - subSubmenuRect.top // Posición relativa al sub-submenu padre
+    };
+    activeSubSubSubmenu.value = subSubOption.submenu;
+    showSubSubSubmenu.value = true;
+  } else {
+    showSubSubSubmenu.value = false;
+    activeSubSubSubmenu.value = null;
+  }
+}
+
+function handleSubSubOptionMouseLeave() {
+  // Programar el cierre del sub-sub-submenu
+  if (!hideSubSubSubmenuTimeout) {
+    hideSubSubSubmenuTimeout = setTimeout(() => {
+      showSubSubSubmenu.value = false;
+      activeSubSubSubmenu.value = null;
+      hideSubSubSubmenuTimeout = null;
+    }, 150);
+  }
+}
+
+function handleSubSubSubmenuEnter() {
+  // Cancelar el cierre cuando entramos al sub-sub-submenu
+  if (hideSubSubSubmenuTimeout) {
+    clearTimeout(hideSubSubSubmenuTimeout);
+    hideSubSubSubmenuTimeout = null;
+  }
+}
+
+function handleSubSubSubmenuLeave() {
+  handleSubSubOptionMouseLeave();
+}
+
+function handleSubSubSubOptionClick(subSubSubOption) {
+  emit('option-selected', subSubSubOption);
   emit('close');
 }
 
@@ -131,9 +215,11 @@ function handleSubOptionMouseEnter(subOption, event) {
   
   if (subOption.submenu) {
     const rect = event.target.getBoundingClientRect();
+    const submenuRect = event.target.closest('.submenu').getBoundingClientRect();
+    
     subSubmenuPosition.value = {
-      x: rect.width - 2,
-      y: 0
+      x: submenuRect.width, // Posición relativa al ancho total del submenu padre
+      y: rect.top - submenuRect.top // Posición relativa al submenu padre
     };
     activeSubSubmenu.value = subOption.submenu;
     showSubSubmenu.value = true;
@@ -221,6 +307,14 @@ function handleSubmenuLeave() {
 
 .submenu {
   z-index: 1001;
+}
+
+.sub-submenu {
+  z-index: 1002;
+}
+
+.sub-sub-submenu {
+  z-index: 1003;
 }
 
 ul {

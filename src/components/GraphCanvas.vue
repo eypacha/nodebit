@@ -74,7 +74,7 @@ const contextMenuOptions = computed(() => {
   return [
     { 
       id: 1, 
-      label: 'Nuevo', 
+      label: 'New', 
       shortcut: 'Ctrl+Click',
       submenu: [
         {
@@ -97,35 +97,35 @@ const contextMenuOptions = computed(() => {
         },
         {
           id: 'node-operators',
-          label: 'Operadores',
+          label: 'Operators',
           submenu: [
             {
               id: 'node-operator-add',
-              label: 'Suma',
+              label: 'Addition',
               nodeType: 'operator',
               content: '+'
             },
             {
               id: 'node-operator-subtract',
-              label: 'Resta',
+              label: 'Subtraction',
               nodeType: 'operator',
               content: '-'
             },
             {
               id: 'node-operator-multiply',
-              label: 'Multiplicación',
+              label: 'Multiplication',
               nodeType: 'operator',
               content: '*'
             },
             {
               id: 'node-operator-divide',
-              label: 'División',
+              label: 'Division',
               nodeType: 'operator',
               content: '/'
             },
             {
               id: 'node-operator-modulo',
-              label: 'Módulo',
+              label: 'Modulo',
               nodeType: 'operator',
               content: '%'
             }
@@ -133,7 +133,7 @@ const contextMenuOptions = computed(() => {
         },
         {
           id: 'node-binary-operators',
-          label: 'Operadores bitwise',
+          label: 'Bitwise Operators',
           submenu: [
             {
               id: 'node-operator-and',
@@ -155,13 +155,13 @@ const contextMenuOptions = computed(() => {
             },
             {
               id: 'node-operator-shift-left',
-              label: 'Shift Left',
+              label: 'Left Shift',
               nodeType: 'operator',
               content: '<<'
             },
             {
               id: 'node-operator-shift-right',
-              label: 'Shift Right',
+              label: 'Right Shift',
               nodeType: 'operator',
               content: '>>'
             },
@@ -170,6 +170,270 @@ const contextMenuOptions = computed(() => {
               label: 'NOT',
               nodeType: 'negation',
               content: '!'
+            }
+          ]
+        },
+        {
+          id: 'node-control-audio',
+          label: 'Control & Audio',
+          submenu: [
+            {
+              id: 'node-out',
+              label: 'Output',
+              nodeType: 'out',
+              content: 'out'
+            },
+            {
+              id: 'node-play',
+              label: 'Play',
+              nodeType: 'play',
+              content: 'play'
+            },
+            {
+              id: 'node-stop',
+              label: 'Stop',
+              nodeType: 'stop',
+              content: 'stop'
+            },
+            {
+              id: 'node-reset',
+              label: 'Reset',
+              nodeType: 'reset',
+              content: 'reset'
+            }
+          ]
+        },
+        {
+          id: 'node-ui',
+          label: 'UI',
+          submenu: [
+            {
+              id: 'node-visualizer',
+              label: 'Visualizer',
+              nodeType: 'visualizer',
+              content: 'visualizer'
+            },
+            {
+              id: 'node-switch',
+              label: 'Switch',
+              nodeType: 'switch',
+              content: 'switch'
+            },
+            {
+              id: 'node-range',
+              label: 'Range',
+              nodeType: 'range',
+              content: 'range'
+            },
+            {
+              id: 'node-toggle',
+              label: 'Toggle',
+              nodeType: 'toggle',
+              content: 'toggle'
+            },
+            {
+              id: 'node-mouse',
+              label: 'Mouse',
+              nodeType: 'mouse',
+              content: 'mouse'
+            },
+            {
+              id: 'node-theme',
+              label: 'Theme',
+              nodeType: 'theme',
+              content: 'theme'
+            },
+            {
+              id: 'node-settings',
+              label: 'Settings',
+              nodeType: 'settings',
+              content: 'settings'
+            }
+          ]
+        },
+        {
+          id: 'node-functions',
+          label: 'Funciones',
+          submenu: [
+            {
+              id: 'node-functions-trigonometric',
+              label: 'Trigonométricas',
+              submenu: [
+                {
+                  id: 'node-sin',
+                  label: 'Seno',
+                  nodeType: 'function',
+                  content: 'sin'
+                },
+                {
+                  id: 'node-cos',
+                  label: 'Coseno',
+                  nodeType: 'function',
+                  content: 'cos'
+                },
+                {
+                  id: 'node-tan',
+                  label: 'Tangente',
+                  nodeType: 'function',
+                  content: 'tan'
+                },
+                {
+                  id: 'node-asin',
+                  label: 'Arco Seno',
+                  nodeType: 'function',
+                  content: 'asin'
+                },
+                {
+                  id: 'node-acos',
+                  label: 'Arco Coseno',
+                  nodeType: 'function',
+                  content: 'acos'
+                },
+                {
+                  id: 'node-atan',
+                  label: 'Arco Tangente',
+                  nodeType: 'function',
+                  content: 'atan'
+                },
+                {
+                  id: 'node-sinh',
+                  label: 'Seno Hiperbólico',
+                  nodeType: 'function',
+                  content: 'sinh'
+                },
+                {
+                  id: 'node-tanh',
+                  label: 'Tangente Hiperbólica',
+                  nodeType: 'function',
+                  content: 'tanh'
+                }
+              ]
+            },
+            {
+              id: 'node-functions-rounding',
+              label: 'Redondeo',
+              submenu: [
+                {
+                  id: 'node-floor',
+                  label: 'Piso',
+                  nodeType: 'function',
+                  content: 'floor'
+                },
+                {
+                  id: 'node-ceil',
+                  label: 'Techo',
+                  nodeType: 'function',
+                  content: 'ceil'
+                },
+                {
+                  id: 'node-round',
+                  label: 'Redondear',
+                  nodeType: 'function',
+                  content: 'round'
+                },
+                {
+                  id: 'node-trunc',
+                  label: 'Truncar',
+                  nodeType: 'function',
+                  content: 'trunc'
+                },
+                {
+                  id: 'node-sign',
+                  label: 'Signo',
+                  nodeType: 'function',
+                  content: 'sign'
+                }
+              ]
+            },
+            {
+              id: 'node-functions-logarithmic',
+              label: 'Logarítmicas',
+              submenu: [
+                {
+                  id: 'node-log',
+                  label: 'Logaritmo Natural',
+                  nodeType: 'function',
+                  content: 'log'
+                },
+                {
+                  id: 'node-log2',
+                  label: 'Logaritmo Base 2',
+                  nodeType: 'function',
+                  content: 'log2'
+                },
+                {
+                  id: 'node-log10',
+                  label: 'Logaritmo Base 10',
+                  nodeType: 'function',
+                  content: 'log10'
+                },
+                {
+                  id: 'node-exp',
+                  label: 'Exponencial',
+                  nodeType: 'function',
+                  content: 'exp'
+                }
+              ]
+            },
+            {
+              id: 'node-functions-basic',
+              label: 'Básicas',
+              submenu: [
+                {
+                  id: 'node-abs',
+                  label: 'Valor Absoluto',
+                  nodeType: 'function',
+                  content: 'asb'
+                },
+                {
+                  id: 'node-sqrt',
+                  label: 'Raíz Cuadrada',
+                  nodeType: 'function',
+                  content: 'sqrt'
+                },
+                {
+                  id: 'node-cbrt',
+                  label: 'Raíz Cúbica',
+                  nodeType: 'function',
+                  content: 'cbrt'
+                },
+                {
+                  id: 'node-random',
+                  label: 'Aleatorio',
+                  nodeType: 'function',
+                  content: 'random'
+                }
+              ]
+            },
+            {
+              id: 'node-functions-two-param',
+              label: 'Dos Parámetros',
+              submenu: [
+                {
+                  id: 'node-pow',
+                  label: 'Potencia',
+                  nodeType: 'function2',
+                  content: 'pow'
+                },
+                {
+                  id: 'node-max',
+                  label: 'Máximo',
+                  nodeType: 'function2',
+                  content: 'max'
+                },
+                {
+                  id: 'node-min',
+                  label: 'Mínimo',
+                  nodeType: 'function2',
+                  content: 'min'
+                },
+                {
+                  id: 'node-hypot',
+                  label: 'Hipotenusa',
+                  nodeType: 'function2',
+                  content: 'hypot'
+                }
+              ]
             }
           ]
         },
@@ -206,6 +470,10 @@ function getDefaultContent(nodeType) {
     case 'time': return 't';
     case 'operator': return '+';
     case 'negation': return '!';
+    case 'out': return 'out';
+    case 'play': return 'play';
+    case 'stop': return 'stop';
+    case 'reset': return 'reset';
     case 'help': return 'help';
     default: return '';
   }
