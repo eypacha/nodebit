@@ -69,6 +69,7 @@ const contextMenuPosition = ref({ x: 0, y: 0 });
 // Generar opciones del menú dinámicamente basado en los tipos de nodos
 const contextMenuOptions = computed(() => {
   const hasSelection = store.selectedNodes.length > 0 || store.selectedConnections.length > 0;
+  const hasClipboardContent = store.copiedNodes.length > 0;
   
   return [
     { 
@@ -113,7 +114,8 @@ const contextMenuOptions = computed(() => {
       id: 3,
       label: 'Pegar',
       shortcut: 'Ctrl+V',
-      action: 'paste'
+      action: 'paste',
+      disabled: !hasClipboardContent
     }
   ];
 });
