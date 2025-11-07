@@ -135,7 +135,29 @@ async function addNode(event) {
 }
 
 function showContextMenuAt(event) {
-  contextMenuPosition.value = { x: event.clientX, y: event.clientY - 41 };
+  const windowWidth = window.innerWidth;
+  const windowHeight = window.innerHeight;
+  const menuWidth = 180; // Ancho estimado del menú principal
+  const menuHeight = 300; // Altura estimada del menú principal
+  
+  let x = event.clientX;
+  let y = event.clientY - 41;
+  
+  // Ajustar si el menú se sale por la derecha
+  if (x + menuWidth > windowWidth) {
+    x = windowWidth - menuWidth - 10;
+  }
+  
+  // Ajustar si el menú se sale por abajo
+  if (y + menuHeight > windowHeight) {
+    y = windowHeight - menuHeight - 10;
+  }
+  
+  // Asegurar que no se vaya a números negativos
+  x = Math.max(10, x);
+  y = Math.max(10, y);
+  
+  contextMenuPosition.value = { x, y };
   showContextMenu.value = true;
 }
 

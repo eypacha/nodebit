@@ -18,7 +18,7 @@
       >
         <span class="menu-label">{{ option.label }}</span>
         <span v-if="option.shortcut" class="shortcut">{{ option.shortcut }}</span>
-        <span v-if="option.submenu" class="arrow">▶</span>
+        <span v-if="option.submenu" class="arrow">{{ submenuToLeft ? '◀' : '▶' }}</span>
       </li>
     </ul>
     <!-- Submenu -->
@@ -40,7 +40,7 @@
           :class="{ 'has-submenu': subOption.submenu }"
         >
           {{ subOption.label }}
-          <span v-if="subOption.submenu" class="arrow">▶</span>
+          <span v-if="subOption.submenu" class="arrow">{{ subSubmenuToLeft ? '◀' : '▶' }}</span>
         </li>
       </ul>
       
@@ -63,7 +63,7 @@
             :class="{ 'has-submenu': subSubOption.submenu }"
           >
             {{ subSubOption.label }}
-            <span v-if="subSubOption.submenu" class="arrow">▶</span>
+            <span v-if="subSubOption.submenu" class="arrow">{{ subSubSubmenuToLeft ? '◀' : '▶' }}</span>
           </li>
         </ul>
         
@@ -92,7 +92,7 @@
 </template>
 
 <script setup>
-import { defineProps, defineEmits, ref } from 'vue';
+import { defineProps, defineEmits, ref, nextTick } from 'vue';
 
 const props = defineProps({
   position: {
@@ -110,14 +110,17 @@ const emit = defineEmits(['option-selected', 'close']);
 const showSubmenu = ref(false);
 const activeSubmenu = ref(null);
 const submenuPosition = ref({ x: 0, y: 0 });
+const submenuToLeft = ref(false);
 
 const showSubSubmenu = ref(false);
 const activeSubSubmenu = ref(null);
 const subSubmenuPosition = ref({ x: 0, y: 0 });
+const subSubmenuToLeft = ref(false);
 
 const showSubSubSubmenu = ref(false);
 const activeSubSubSubmenu = ref(null);
 const subSubSubmenuPosition = ref({ x: 0, y: 0 });
+const subSubSubmenuToLeft = ref(false);
 
 let hideSubmenuTimeout = null;
 let hideSubSubmenuTimeout = null;
@@ -165,13 +168,29 @@ function handleSubSubOptionMouseEnter(subSubOption, event) {
   if (subSubOption.submenu) {
     const rect = event.target.getBoundingClientRect();
     const subSubmenuRect = event.target.closest('.sub-submenu').getBoundingClientRect();
+    const windowWidth = window.innerWidth;
     
-    subSubSubmenuPosition.value = {
-      x: subSubmenuRect.width, // Posición relativa al ancho total del sub-submenu padre
-      y: rect.top - subSubmenuRect.top // Posición relativa al sub-submenu padre
-    };
     activeSubSubSubmenu.value = subSubOption.submenu;
     showSubSubSubmenu.value = true;
+    
+    // Usar nextTick para obtener las dimensiones después de que se renderice
+    nextTick(() => {
+      const subSubSubmenuElement = document.querySelector('.context-menu.sub-sub-submenu');
+      if (subSubSubmenuElement) {
+        const subSubSubmenuWidth = subSubSubmenuElement.offsetWidth;
+        
+        // Verificar si el sub-sub-submenu se saldría por la derecha de la pantalla
+        const spaceOnRight = windowWidth - rect.right;
+        const wouldOverflow = spaceOnRight < subSubSubmenuWidth;
+        
+        subSubSubmenuToLeft.value = wouldOverflow;
+        
+        subSubSubmenuPosition.value = {
+          x: wouldOverflow ? -subSubSubmenuWidth : subSubmenuRect.width,
+          y: rect.top - subSubmenuRect.top
+        };
+      }
+    });
   } else {
     showSubSubSubmenu.value = false;
     activeSubSubSubmenu.value = null;
@@ -184,6 +203,7 @@ function handleSubSubOptionMouseLeave() {
     hideSubSubSubmenuTimeout = setTimeout(() => {
       showSubSubSubmenu.value = false;
       activeSubSubSubmenu.value = null;
+      subSubSubmenuToLeft.value = false;
       hideSubSubSubmenuTimeout = null;
     }, 150);
   }
@@ -216,13 +236,29 @@ function handleSubOptionMouseEnter(subOption, event) {
   if (subOption.submenu) {
     const rect = event.target.getBoundingClientRect();
     const submenuRect = event.target.closest('.submenu').getBoundingClientRect();
+    const windowWidth = window.innerWidth;
     
-    subSubmenuPosition.value = {
-      x: submenuRect.width, // Posición relativa al ancho total del submenu padre
-      y: rect.top - submenuRect.top // Posición relativa al submenu padre
-    };
     activeSubSubmenu.value = subOption.submenu;
     showSubSubmenu.value = true;
+    
+    // Usar nextTick para obtener las dimensiones después de que se renderice
+    nextTick(() => {
+      const subSubmenuElement = document.querySelector('.context-menu.sub-submenu');
+      if (subSubmenuElement) {
+        const subSubmenuWidth = subSubmenuElement.offsetWidth;
+        
+        // Verificar si el sub-submenu se saldría por la derecha de la pantalla
+        const spaceOnRight = windowWidth - rect.right;
+        const wouldOverflow = spaceOnRight < subSubmenuWidth;
+        
+        subSubmenuToLeft.value = wouldOverflow;
+        
+        subSubmenuPosition.value = {
+          x: wouldOverflow ? -subSubmenuWidth : submenuRect.width,
+          y: rect.top - submenuRect.top
+        };
+      }
+    });
   } else {
     showSubSubmenu.value = false;
     activeSubSubmenu.value = null;
@@ -234,6 +270,7 @@ function handleSubOptionMouseLeave() {
     hideSubSubmenuTimeout = setTimeout(() => {
       showSubSubmenu.value = false;
       activeSubSubmenu.value = null;
+      subSubmenuToLeft.value = false;
       hideSubSubmenuTimeout = null;
     }, 150);
   }
@@ -259,12 +296,29 @@ function handleMouseEnter(option, event) {
   
   if (option.submenu) {
     const rect = event.target.getBoundingClientRect();
-    submenuPosition.value = {
-      x: rect.width - 2, // Posición relativa al elemento padre
-      y: 0
-    };
+    const windowWidth = window.innerWidth;
+    
     activeSubmenu.value = option.submenu;
     showSubmenu.value = true;
+    
+    // Usar nextTick para obtener las dimensiones después de que se renderice
+    nextTick(() => {
+      const submenuElement = document.querySelector('.context-menu.submenu');
+      if (submenuElement) {
+        const submenuWidth = submenuElement.offsetWidth;
+        
+        // Verificar si el submenu se saldría por la derecha de la pantalla
+        const spaceOnRight = windowWidth - rect.right;
+        const wouldOverflow = spaceOnRight < submenuWidth;
+        
+        submenuToLeft.value = wouldOverflow;
+        
+        submenuPosition.value = {
+          x: wouldOverflow ? -submenuWidth : rect.width,
+          y: 0
+        };
+      }
+    });
   }
 }
 
@@ -274,6 +328,7 @@ function handleMouseLeave() {
     hideSubmenuTimeout = setTimeout(() => {
       showSubmenu.value = false;
       activeSubmenu.value = null;
+      submenuToLeft.value = false;
       hideSubmenuTimeout = null;
     }, 150);
   }
