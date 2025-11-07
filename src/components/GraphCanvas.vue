@@ -97,7 +97,7 @@ const contextMenuOptions = computed(() => {
         },
         {
           id: 'node-operators',
-          label: 'Operadores aritméticos',
+          label: 'Operadores',
           submenu: [
             {
               id: 'node-operator-add',
@@ -128,6 +128,48 @@ const contextMenuOptions = computed(() => {
               label: 'Módulo',
               nodeType: 'operator',
               content: '%'
+            }
+          ]
+        },
+        {
+          id: 'node-binary-operators',
+          label: 'Operadores bitwise',
+          submenu: [
+            {
+              id: 'node-operator-and',
+              label: 'AND',
+              nodeType: 'operator',
+              content: '&'
+            },
+            {
+              id: 'node-operator-or',
+              label: 'OR',
+              nodeType: 'operator',
+              content: '|'
+            },
+            {
+              id: 'node-operator-xor',
+              label: 'XOR',
+              nodeType: 'operator',
+              content: '^'
+            },
+            {
+              id: 'node-operator-shift-left',
+              label: 'Shift Left',
+              nodeType: 'operator',
+              content: '<<'
+            },
+            {
+              id: 'node-operator-shift-right',
+              label: 'Shift Right',
+              nodeType: 'operator',
+              content: '>>'
+            },
+            {
+              id: 'node-operator-not',
+              label: 'NOT',
+              nodeType: 'negation',
+              content: '!'
             }
           ]
         },
@@ -163,6 +205,7 @@ function getDefaultContent(nodeType) {
     case 'number': return '0';
     case 'time': return 't';
     case 'operator': return '+';
+    case 'negation': return '!';
     case 'help': return 'help';
     default: return '';
   }
