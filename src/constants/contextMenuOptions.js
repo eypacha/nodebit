@@ -365,6 +365,30 @@ export const CONTEXT_MENU_OPTIONS = [
         ]
       },
       {
+        id: 'node-data',
+        label: 'Data',
+        submenu: [
+          {
+            id: 'node-export',
+            label: 'Export',
+            nodeType: 'export',
+            content: 'export'
+          },
+          {
+            id: 'node-import',
+            label: 'Import',
+            nodeType: 'import',
+            content: 'import'
+          },
+          {
+            id: 'node-exportimg',
+            label: 'Export Image',
+            nodeType: 'exportImg',
+            content: 'exportimg'
+          }
+        ]
+      },
+      {
         id: 'node-help',
         label: 'Help',
         nodeType: 'help',
