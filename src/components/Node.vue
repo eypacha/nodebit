@@ -2,7 +2,7 @@
   <vue-draggable-resizable
     :parent="true"
     class="node"
-    :class="[`node-${node.type}`, { selected: isSelected, editable }]"
+  :class="[`node-${node.type}`, { selected: isSelected, editable, 'node-audio': nodeType.audioOutput }]"
     :w="node.w"
     :h="node.h"
     :min-width="nodeMinWidth"
@@ -58,7 +58,7 @@
       :nodeId="node.id"
       :content="node.content"
       :connectionActive="store.isConnectionActive(node.id, 0, 'input')"/>
-    <div v-else-if="node.type == 'out'" class="content noselect">out</div>
+    <div v-else-if="node.type == 'eval'" class="content noselect">EVAL</div>
     <div v-else class="content noselect" style="color: cyan !important">{{ node.content }}</div>
 
     <div v-if="nodeType.inputs" class="inputs">
@@ -88,7 +88,24 @@
       </div>
     </div>
 
-    <div v-if="nodeType.outputs" class="outputs">
+    <div v-if="nodeType.outputs && nodeType.audioOutput" class="outputs outputs-center">
+      <div
+        v-for="n in nodeType.outputs"
+        :key="`output-socket-${n - 1}`"
+        class="socket-wrapper center"
+      >
+        <div
+          class="socket"
+          :class="
+            (`socket-${n - 1}`,
+            { active: store.isConnectionActive(node.id, n - 1, 'output') })
+          "
+          @mousedown="$emit('start-path', node.id, n - 1)"
+        />
+      </div>
+      <span v-if="nodeType.outputs > 3" class="label noselect">{{ n }}</span>
+    </div>
+    <div v-else-if="nodeType.outputs" class="outputs">
       <div
         v-for="n in nodeType.outputs"
         :key="`output-socket-${n - 1}`"
@@ -103,9 +120,7 @@
           @mousedown="$emit('start-path', node.id, n - 1)"
         />
       </div>
-      <span v-if="nodeType.outputs > 3" class="label noselect">{{
-        n
-      }}</span>
+      <span v-if="nodeType.outputs > 3" class="label noselect">{{ n }}</span>
     </div>
   </vue-draggable-resizable>
 </template>

@@ -105,10 +105,10 @@ export const CONTEXT_MENU_OPTIONS = [
         label: 'Control & Audio',
         submenu: [
           {
-            id: 'node-out',
-            label: 'Output',
-            nodeType: 'out',
-            content: 'out'
+            id: 'node-eval',
+            label: 'Eval',
+            nodeType: 'eval',
+            content: 'eval'
           },
           {
             id: 'node-play',

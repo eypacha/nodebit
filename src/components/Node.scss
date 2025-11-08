@@ -250,6 +250,20 @@
       flex-wrap: wrap;
       height: 14px;
     }
+    .outputs-center {
+      left: 50%;
+      right: auto;
+      bottom: -16px;
+      top: auto;
+      transform: translateX(-50%);
+      justify-content: center;
+      align-items: center;
+      width: auto;
+    }
+    .socket-wrapper.center {
+      align-items: center;
+      justify-content: center;
+    }
   
     .inputs {
       top: 0;
