@@ -383,5 +383,11 @@ export const CONTEXT_MENU_OPTIONS = [
     label: 'Paste',
     shortcut: 'Ctrl+V',
     action: 'paste'
+  },
+  {
+    id: 4,
+    label: 'Eliminar',
+    shortcut: 'Del',
+    action: 'delete'
   }
 ];

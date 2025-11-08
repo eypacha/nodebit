@@ -79,6 +79,9 @@ const contextMenuOptions = computed(() => {
     if (option.action === 'paste') {
       return { ...option, disabled: !hasClipboardContent };
     }
+    if (option.action === 'delete') {
+      return { ...option, disabled: !hasSelection };
+    }
     return option;
   });
 });
@@ -183,6 +186,13 @@ async function handleContextMenuOption(option) {
         store.evaluateBytebeat();
         store.saveState();
         console.log('📋 Pasted selection');
+        break;
+      case 'delete':
+        store.deleteSelectedConnections && store.deleteSelectedConnections();
+        store.deleteSelectedNodes && store.deleteSelectedNodes();
+        store.evaluateBytebeat && store.evaluateBytebeat();
+        store.saveState && store.saveState();
+        console.log('🗑️ Eliminated selection');
         break;
     }
     return;
