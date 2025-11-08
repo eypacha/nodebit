@@ -36,17 +36,23 @@ onMounted(() => {
         ctx.clearRect(0, 0, props.width, props.height);
 
         ctx.lineWidth = 1;
-        ctx.strokeStyle = "yellow";
-        ctx.beginPath();
-        for (let x = 0; x < props.width; ++x) {
-          const y = (newData.right[x] * 0.5 + 0.5) * props.height;
-          if (x === 0) {
-            ctx.moveTo(x, props.height - y);
-          } else {
-            ctx.lineTo(x, props.height - y);
+
+        function drawWave(strokeStyle, yOffset = 0) {
+          ctx.strokeStyle = strokeStyle;
+          ctx.beginPath();
+          for (let x = 0; x < props.width; ++x) {
+            const y = (newData.right[x] * 0.5 + 0.5) * props.height;
+            if (x === 0) {
+              ctx.moveTo(x, props.height - y + yOffset);
+            } else {
+              ctx.lineTo(x, props.height - y + yOffset);
+            }
           }
+          ctx.stroke();
         }
-        ctx.stroke();
+
+        drawWave("cyan");
+        drawWave("yellow", 5);
       }
     }
   );
