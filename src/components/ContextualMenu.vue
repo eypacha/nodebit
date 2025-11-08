@@ -39,7 +39,8 @@
           @mouseleave="handleSubOptionMouseLeave"
           :class="{ 'has-submenu': subOption.submenu }"
         >
-          {{ subOption.label }}
+          <span class="menu-label">{{ subOption.label }}</span>
+          <span v-if="subOption.shortcut" class="shortcut">{{ subOption.shortcut }}</span>
           <span v-if="subOption.submenu" class="arrow">{{ subSubmenuToLeft ? '◀' : '▶' }}</span>
         </li>
       </ul>
@@ -62,7 +63,8 @@
             @mouseleave="handleSubSubOptionMouseLeave"
             :class="{ 'has-submenu': subSubOption.submenu }"
           >
-            {{ subSubOption.label }}
+            <span class="menu-label">{{ subSubOption.label }}</span>
+            <span v-if="subSubOption.shortcut" class="shortcut">{{ subSubOption.shortcut }}</span>
             <span v-if="subSubOption.submenu" class="arrow">{{ subSubSubmenuToLeft ? '◀' : '▶' }}</span>
           </li>
         </ul>
@@ -82,7 +84,8 @@
               :key="subSubSubOption.id"
               @click="handleSubSubSubOptionClick(subSubSubOption)"
             >
-              {{ subSubSubOption.label }}
+              <span class="menu-label">{{ subSubSubOption.label }}</span>
+              <span v-if="subSubSubOption.shortcut" class="shortcut">{{ subSubSubOption.shortcut }}</span>
             </li>
           </ul>
         </div>
@@ -387,13 +390,13 @@ li {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 8px;
   white-space: nowrap;
+  gap: 12px;
 }
 
-.menu-label {
-  flex: 1;
-}
+/* li > * {
+  outline: dashed 1px white;
+} */
 
 .shortcut {
   font-size: 11px;
@@ -416,10 +419,6 @@ li.disabled {
 
 li.disabled:hover {
   background: transparent;
-}
-
-.has-submenu {
-  padding-right: 24px;
 }
 
 .arrow {
