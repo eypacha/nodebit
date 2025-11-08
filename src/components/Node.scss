@@ -294,11 +294,17 @@
       width: 10px;
       height: 3px;
       outline: solid 1px var(--color-command);
-    
+      background: var(--color-background);
+      transition: background 0.2s;
       &.active {
         background: var(--color-command);
       }
-
+    }
+    .socket-audio {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      margin-top: 7px;
     }
 
 

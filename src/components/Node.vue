@@ -2,7 +2,7 @@
   <vue-draggable-resizable
     :parent="true"
     class="node"
-  :class="[`node-${node.type}`, { selected: isSelected, editable, 'node-audio': nodeType.audioOutput }]"
+    :class="[`node-${node.type}`, { selected: isSelected, editable }]"
     :w="node.w"
     :h="node.h"
     :min-width="nodeMinWidth"
@@ -95,7 +95,7 @@
         class="socket-wrapper center"
       >
         <div
-          class="socket"
+          class="socket socket-audio"
           :class="
             (`socket-${n - 1}`,
             { active: store.isConnectionActive(node.id, n - 1, 'output') })
